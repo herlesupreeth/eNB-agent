@@ -1,0 +1,14 @@
+
+	Empower communication protocol
+
+These are the Google protocol buffer source files of the communication which
+takes places between the Agent and the Controller. The project has been 
+organized to build as a static library that need to be later included in any 
+project that needs it.
+
+
+BUILD
+
+Invoke the make to build the library. Headers and source files will be generated
+in the 'pb' subfolder, then they will be compiled and linked in 'libemproto'
+library.

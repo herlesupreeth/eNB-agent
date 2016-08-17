@@ -1,0 +1,11 @@
+
+	EmPOWER Agent
+
+This is the standalone logic for the agent. It completely abstracts over the
+technology used and provides a communication interface for the controller. See 
+the documentation folder for more info.
+
+BUILD
+
+Invoke the make to build the library. Source files present in this directory can
+be directly accessed or used as a static library to include in your application.
