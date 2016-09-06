@@ -25,41 +25,68 @@ import "statistics.proto";
 import "configs.proto";
 
 //
-// Type of recognized messages.
+// Flag to determine whether add or delete the event.
 //
-enum MsgType {
-	// Invalid message; not computed by default.
-	INVALID = 0;
-	// Hello request message.
-	HELLO_REQ = 1;
-	// Hello reply message.
-	HELLO_REP = 2;
-	// Statistics request message.
-	STATS_REQ = 3;
-	// Statistics reply message.
-	STATS_REP = 4;
-	// Configuration request message.
-	CONF_REQ = 5;
-	// Configuration reply message.
-	CONF_REP = 6;
-};
+enum event_action {
+	// Add event.
+	EA_ADD = 0;
+	// Delete event.
+	EA_DEL = 1;
+}
 
 //
-// Common head to identify the operation.
+// Common header to identify transaction.
 //
 message header {
-	// Type of 1st level message.
-	optional MsgType type = 1;
 	// Version of 1st level message.
-	optional uint32 vers = 2;
+	required uint32 vers = 1;
 	// Base station identifier.
-	optional uint32 b_id = 3;
-	// Module identifier (Used in Virtualized RAN concepts and OAI).
-	optional uint32 m_id = 4;
+	required uint32 b_id = 2;
 	// Sequence number.
-	optional uint32 seq = 5;
+	required uint32 seq = 3;
 	// Transaction identifier.
-	optional uint32 t_id = 6;
+	required uint32 t_id = 4;
+}
+
+//
+// Defines events that can occur once.
+//
+message single_event {
+	oneof events {
+		hello mHello = 1;
+		ues_id mUEs_id = 2;
+		ue_rrc_meas_conf mUE_rrc_meas_conf = 3;
+	}
+}
+
+//
+// Defines events that can be scheduled for a particular interval.
+//
+message schedule_event {
+	// Interval in milliseconds between consecutive events.
+	optional uint32 interval = 1;
+	// Action to be performed in this event.
+	optional event_action action = 2;
+	// Events to be scheduled.
+	oneof events {
+		ues_id mUEs_id = 3;
+		ue_rrc_meas_conf mUE_rrc_meas_conf = 4;
+	}
+}
+
+//
+// Defines events that can be triggered based, i.e meeting a certain condition.
+//
+message trigger_event {
+	// Action to be performed in this event.
+	optional event_action action = 1;
+	// Triggered events.
+	oneof events {
+		hello mHello = 2;
+		ues_id mUEs_id = 3;
+		rrc_meas mRRC_meas = 4;
+		ue_rrc_meas_conf mUE_rrc_meas_conf = 5;
+	}
 }
 
 //
@@ -67,11 +94,11 @@ message header {
 //
 message emage_msg {
 	// Header for every message.
-	optional header head = 1;
-	// Type of possible messages.
-	oneof message {
-		hello mHello = 2;
-		statistics mStats = 3;
-		configs mConfs = 4;
+	required header head = 1;
+	// Type of possible events.
+	oneof event_types {
+		single_event se = 2;
+		schedule_event sche = 3;
+		trigger_event te = 4;
 	}
 }

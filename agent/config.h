@@ -31,3 +31,4 @@ struct config_profile {
 };
 
 #endif /* __EMAGE_CONFIG_H */
+

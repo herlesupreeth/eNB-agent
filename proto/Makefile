@@ -45,10 +45,10 @@ clean:
 	
 install:
 	cp ./libemproto.so $(INSTDIR)
-	mkdir -p $(INCLDIR)/pb
-	cp -r ./pb/* $(INCLDIR)/pb
+	mkdir -p $(INCLDIR)/pb/
+	cp -r ./pb/* $(INCLDIR)/pb/
 	
 uninstall:
 	rm $(INSTDIR)/libemproto.so
 	rm -r $(INCLDIR)/pb
-	
+

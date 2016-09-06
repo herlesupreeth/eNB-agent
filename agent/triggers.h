@@ -1,0 +1,61 @@
+/* Copyright (c) 2016 Kewin Rausch <kewin.rausch@create-net.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * Empower Agent internal triggers logic.
+ */
+
+#ifndef __EMAGE_TRIGGERS_H
+#define __EMAGE_TRIGGERS_H
+
+#include "emlist.h"
+
+/* Definition for a single trigger. */
+struct trigger {
+	/* Member of a list. */
+	struct list_head next;
+
+	/* Id of this trigger. */
+	int id;
+	/* Type of this trigger. */
+	int type;
+};
+
+/* Triggering context for an agent. */
+struct tr_context {
+	/* List of triggers. */
+	struct list_head ts;
+
+	/* Lock for this context. */
+	pthread_spinlock_t lock;
+};
+
+/* Add a new trigger in the agent triggering context.
+ * By adding a trigger you make it valid, since disabled triggers are just
+ * removed from the list.
+ */
+int tr_add(struct tr_context * tc, int id, int type);
+
+/* Flush everything and clean the context. */
+int tr_flush(struct tr_context * tc);
+
+/* Peek the context to see if it has a specific trigger. */
+int tr_has_trigger(struct tr_context * tc, int id);
+
+/* Removes a trigger from the agent triggering context. */
+int tr_rem(struct tr_context * tc, int id);
+
+#endif
+

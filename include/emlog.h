@@ -20,6 +20,8 @@
 #ifndef __EMAGE_LOG_H
 #define __EMAGE_LOG_H
 
+#include <stdio.h>
+
 /* Comment this to remove debugging logs. */
 /* #define EM_DEBUG */
 /* Comment this to remove send message RAW logs. */
@@ -39,3 +41,4 @@
 #endif
 
 #endif
+

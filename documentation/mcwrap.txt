@@ -1,0 +1,32 @@
+
+	EmPOWER Agent technology wrapping idea
+	
+	
+	
+EMAge has been developed in such a way that allows external developer/companies
+to introduce their own free/propertary software inside the agent-controller 
+context. No modification can/must be done on the core itself, since it's logic 
+is completely unbound from the LTE stack implementations.
+
+What the agent process are a bunch of commands that are isued by the controller
+to the deployed base stations. How these messages are handled, preserved and 
+triggered is not a wrapper concern (mind-your-own-businness concept).   
+
+What the wrapper must do is simple: provide a way to translate this orders in 
+the stack 'language'. Triggered actions (the agent operations) always deliver
+the message which has generated them (the order received by the controller), so 
+wrappers are free to investigate further on the details of the request. 
+
+Such actions also always demand for an answer to send to the controller, but you
+can always pass a null pointer if you don't desire to provide any answer: this 
+case is handled and does not generate any error, but simply does not send any 
+feedback to the controller.
+
+If the job was one-time-only then you lost the opportunity to communicate with
+your boss, otherwise the next run you can always decide to send something.
+
+Take in account that the agent does not make any assumption on the leaving 
+messages, so you can basically send to the controller any type of valid message.
+Is up to the wrapper decide what to do: you got the freedom to do what you want.
+
+Kewin R.  

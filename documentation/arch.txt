@@ -1,7 +1,9 @@
 
 	EmPOWER Agent architecture
 	
-This is the architecture of the core component of the Agent project. EMAge allow
+	
+	
+This is the architecture of the core component of he Agent project. EMAge allow
 you to run different instances of agent which you can distinguish by using the
 'base station id'. Each instance needs a set of operations (which are the 
 technology wrapper) and an unique id in order to work. The core component will 
@@ -71,5 +73,8 @@ are the Network and Scheduling contextes:
         |                                                              |
         +--------------------------------------------------------------+
 
-The contextes are independend from each other, so netowrking operations are 
-never interrupted by running jobs.      
+The contextes are independend from each other, so networking operations are 
+never interrupted by running jobs.
+
+
+Kewin R.

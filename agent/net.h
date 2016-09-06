@@ -68,6 +68,6 @@ int net_send(struct net_context * net, char * buf, unsigned int size);
 int net_start(struct net_context * net);
 
 /* Order the network listener to stop it's operations. */
-void net_stop(struct net_context * net);
+int net_stop(struct net_context * net);
 
 #endif /* __EMAGE_NET_H */

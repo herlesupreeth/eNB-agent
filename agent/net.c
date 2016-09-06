@@ -29,6 +29,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 
+#include <emage.h>
 #include <emlog.h>
 #include <emage/pb/main.pb-c.h>
 
@@ -65,7 +66,7 @@ int net_connected(struct net_context * net) {
 	INIT_LIST_HEAD(&h->next);
 	h->elapse = 1000;
 	h->type = JOB_TYPE_HELLO;
-	h->reschedule = 1;
+	h->reschedule = -1;
 
 	/* Add the Hello message. */
 	sched_add_job(h, &a->sched);
@@ -219,6 +220,7 @@ int net_send(struct net_context * context, char * buf, unsigned int size) {
 	return send(context->sockfd, buf, size, MSG_DONTWAIT | MSG_NOSIGNAL);
 }
 
+#if 0
 int net_enbcr(struct net_context * net, EmageMsg * msg) {
 	struct agent * a = container_of(net, struct agent, net);
 	EnbConfigRequest * cr = msg->mconfs->enb_conf_req;
@@ -245,7 +247,9 @@ err_free:
 	emage_msg__free_unpacked(msg, 0);
 	return -1;
 }
+#endif
 
+#if 0
 int net_uecr(struct net_context * net, EmageMsg * msg) {
 	struct agent * a = container_of(net, struct agent, net);
 	EnbConfigRequest * cr = msg->mconfs->enb_conf_req;
@@ -272,7 +276,9 @@ err_free:
 	emage_msg__free_unpacked(msg, 0);
 	return -1;
 }
+#endif
 
+#if 0
 int net_L2sr(struct net_context * net, EmageMsg * msg) {
 	struct agent * a = container_of(net, struct agent, net);
 	L2StatisticsRequest * l2r = msg->mstats->l2_stats_req;
@@ -315,9 +321,12 @@ err_free:
 	emage_msg__free_unpacked(msg, 0);
 	return -1;
 }
+#endif
 
+#if 0
 /* Process an incoming configuration request message. */
 int net_process_config_req(struct net_context * net, EmageMsg * msg) {
+
 	Configs * c = msg->mconfs;
 
 	if (c->type == CONFIG_MSG_TYPE__ENB_CONF_REQUEST) {
@@ -325,13 +334,15 @@ int net_process_config_req(struct net_context * net, EmageMsg * msg) {
 		return net_enbcr(net, msg);
 	}
 	else if (c->type == CONFIG_MSG_TYPE__UE_CONF_REQUEST) {
-		EMDBG("UE configuration request detected");
+		EMDBG("eNB configuration request detected");
 		return net_uecr(net, msg);
 	}
 
 	return 0;
 }
+#endif
 
+#if 0
 /* Process an incoming statistic request message. */
 int net_process_stats_req(struct net_context * net, EmageMsg * msg) {
 	Statistics * s = msg->mstats;
@@ -343,18 +354,125 @@ int net_process_stats_req(struct net_context * net, EmageMsg * msg) {
 
 	return 0;
 }
+#endif
+
+int net_sched_job(
+	struct agent * a,
+	int type,
+	int interval,
+	int res,
+	EmageMsg * msg) {
+
+	struct sched_job * job = malloc(sizeof(struct sched_job));
+
+	if(!job) {
+		EMLOG("Not enough memory!");
+		return -1;
+	}
+
+	memset(job, 0, sizeof(struct sched_job));
+
+	INIT_LIST_HEAD(&job->next);
+	job->type = type;
+	job->args = msg;
+	job->id = msg->head->t_id;
+	job->elapse = interval;
+	job->reschedule = res;
+
+	sched_add_job(job, &a->sched);
+}
+
+int net_te_usid(struct net_context * net, EmageMsg * msg) {
+	struct agent * a = container_of(net, struct agent, net);
+	int status = 0;
+
+	if(!msg->te->mues_id) {
+		EMDBG("Malformed UEs trigger message!\n");
+		return -1;
+	}
+
+	if(msg->te->mues_id->ues_id_m_case == UES_ID__UES_ID_M_REQ) {
+		if(!msg->te->has_action) {
+			EMDBG("Wrong UEs_ID request format: no action.");
+			return -1;
+		}
+
+		if(msg->te->action == EVENT_ACTION__EA_DEL) {
+			status = tr_rem(&a->trig, msg->head->t_id);
+		} else {
+			status = tr_add(
+				&a->trig,
+				msg->head->t_id,
+				EM_UEs_ID_REPORT_TRIGGER);
+
+			net_sched_job(
+				a,
+				JOB_TYPE_UEs_LOG_TRIGGER,
+				1, 0,
+				msg);
+		}
+	}
+
+	return status;
+}
+
+int net_process_sched_event(struct net_context * net, EmageMsg * msg) {
+	ScheduleEvent * ce = msg->sche;
+
+	switch(ce->events_case) {
+	default:
+		EMDBG("Unknown scheduled event, type=%d", ce->events_case);
+		break;
+	}
+
+	return 0;
+}
+
+int net_process_single_event(struct net_context * net, EmageMsg * msg) {
+	SingleEvent * se = msg->se;
+
+	switch(se->events_case) {
+	default:
+		EMDBG("Unknown single event, type=%d", se->events_case);
+		break;
+	}
+
+	return 0;
+}
+
+int net_process_trigger_event(struct net_context * net, EmageMsg * msg) {
+	TriggerEvent * te = msg->te;
+
+	if(!te) {
+		EMDBG("Malformed trigger event message!\n");
+		return -1;
+	}
+
+	switch(te->events_case) {
+	case TRIGGER_EVENT__EVENTS_M_UES_ID:
+		return net_te_usid(net, msg);
+	default:
+		EMDBG("Unknown trigger event, type=%d", te->events_case);
+		break;
+	}
+
+	return 0;
+}
 
 /* Process incoming messages. */
 int net_process_message(struct net_context * net, EmageMsg * msg) {
-	switch(msg->head->type) {
-	case MSG_TYPE__STATS_REQ:
-		EMDBG("Statistics request from the controller");
-		return net_process_stats_req(net, msg);
-	case MSG_TYPE__CONF_REQ:
-		EMDBG("Configuration request from the controller");
-		return net_process_config_req(net, msg);
+	switch(msg->event_types_case) {
+	/* Single events messages. */
+	case EMAGE_MSG__EVENT_TYPES_SE:
+		return net_process_single_event(net, msg);
+	/* Scheduled events messages. */
+	case EMAGE_MSG__EVENT_TYPES_SCHE:
+		return net_process_sched_event(net, msg);
+	/* Triggered events messages. */
+	case EMAGE_MSG__EVENT_TYPES_TE:
+		return net_process_trigger_event(net, msg);
 	default:
-		EMLOG("Message not known, type=%d", msg->head->type);
+		EMDBG("Unknown message received!");
 		break;
 	}
 
@@ -408,7 +526,7 @@ void * net_loop(void * args) {
 					"msg=%d, recv=%d", mlen, bread);
 
 				/* Ok, this is serious, since we can loose the
-				 * alignment of the 4 firsts bytes which 
+				 * alignment of the 4 firsts bytes which
 				 * contains the message size.
 				 *
 				 * Cloasing the socket here cause the Hello to
@@ -461,10 +579,13 @@ int net_start(struct net_context * net) {
 	return 0;
 }
 
-int void_stop(struct net_context * net) {
+int net_stop(struct net_context * net) {
 	/* Stop and wait for it... */
 	net->stop = 1;
 	pthread_join(net->thread, 0);
 
+	pthread_spin_destroy(&net->lock);
+
 	return 0;
 }
+

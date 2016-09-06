@@ -65,40 +65,28 @@ int msg_parse_hello(int seq, int bid, char ** buf, int * size) {
 	int ms = 0;
 	int hr = 0;
 
-	EmageMsg msg = EMAGE_MSG__INIT;
-	Header hdr = HEADER__INIT;
-	Hello hello = HELLO__INIT;
+	EmageMsg msg    = EMAGE_MSG__INIT;
+	Header hdr      = HEADER__INIT;
+	SingleEvent se  = SINGLE_EVENT__INIT;
+	Hello hello     = HELLO__INIT;
+	HelloRepl hrepl = HELLO_REPL__INIT;
 
-	/*
-	 * Filling the header.
-	 */
-
-	hdr.has_type = 1;
-	hdr.type = MSG_TYPE__HELLO_REP;
-
-	hdr.has_vers = 1;
 	hdr.vers = 1;
-
-	hdr.has_b_id = 1;
+	hdr.seq  = seq;
+	hdr.t_id = 0;
 	hdr.b_id = bid;
 
-	hdr.has_seq = 1;
-	hdr.seq = seq;
+	hrepl.period = 1000;
 
-	/*
-	 * Filling Hello.
-	 */
+	hello.hello_m_case = HELLO__HELLO_M_REPL;
+	hello.repl = &hrepl;
 
-	hello.has_period = 1;
-	hello.period = 1000;
-
-	/*
-	 * Link everything together.
-	 */
+	se.events_case = SINGLE_EVENT__EVENTS_M_HELLO;
+	se.mhello = &hello;
 
 	msg.head = &hdr;
-	msg.mhello = &hello;
-	msg.message_case = EMAGE_MSG__MESSAGE_M_HELLO;
+	msg.se = &se;
+	msg.event_types_case = EMAGE_MSG__EVENT_TYPES_SE;
 
 	/*
 	 * Buffer creation and fill up.
@@ -106,3 +94,4 @@ int msg_parse_hello(int seq, int bid, char ** buf, int * size) {
 
 	return msg_parse(buf, size, &msg);
 }
+

@@ -13,16 +13,38 @@
  * limitations under the License.
  */
 
-/* 
+/*
  * This file carries the common header definition for 1st level messages.
 */
 
-syntax = "proto2"; 
+syntax = "proto2";
 
 //
 // Hello message carries : periodicity of hello message.
 //
-message hello  {
+message hello {
+	// One of hello messages.
+	oneof hello_m {
+		// Hello request message.
+		hello_req req = 1;
+		// Hello reply message.
+		hello_repl repl = 2;
+	}
+
+}
+
+//
+// Hello message request: periodicity of hello message to set.
+//
+message hello_req {
 	// Hello message periodicity.
-	optional uint32 period = 1;
+	required uint32 period = 1;
+}
+
+//
+// Hello message reply: carries current periodicity of hello message.
+//
+message hello_repl {
+	// Hello message periodicity.
+	required uint32 period = 1;
 }

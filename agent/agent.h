@@ -20,21 +20,26 @@
 #ifndef __EMAGE_AGENT_H
 #define __EMAGE_AGENT_H
 
+#include "emlist.h"
 #include "net.h"
 #include "sched.h"
+#include "triggers.h"
 
 struct em_agent_ops;
 
-/* This is ultimately the agent. */
+/* This is ultimately an agent. */
 struct agent {
 	/* Member of a list. */
-	struct list_head listh;
+	struct list_head next;
 
 	/* Base station id which the agent is serving. */
 	int b_id;
 
 	/* Registered, technology dependant, operations. */
 	struct em_agent_ops * ops;
+
+	/* Triggering context for this agent.*/
+	struct tr_context trig;
 
 	/* Network operation context for this agent. */
 	struct net_context net;
@@ -43,3 +48,4 @@ struct agent {
 };
 
 #endif /* __EMAGE_AGENT_H */
+

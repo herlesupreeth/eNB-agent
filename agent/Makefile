@@ -36,6 +36,7 @@ all:
 		$(AGENTP)/msg.c 					\
 		$(AGENTP)/net.c						\
 		$(AGENTP)/sched.c 					\
+		$(AGENTP)/triggers.c 					\
 		$(AGENTP)/core.c
 	$(CC) -shared -o libemagent.so *.o  
 	
@@ -49,6 +50,7 @@ debug:
 		$(AGENTP)/msg.c 					\
 		$(AGENTP)/net.c						\
 		$(AGENTP)/sched.c 					\
+		$(AGENTP)/triggers.c 					\
 		$(AGENTP)/core.c
 	$(CC) -shared -o libemagent.so *.o  
 	
@@ -61,3 +63,4 @@ install:
 uninstall:
 	rm $(INSTDIR)/libemagent.so
 	rm -r $(INCLDIR)
+

@@ -21,10 +21,12 @@
 #define __EMAGE_SCHEDULER_H
 
 #define JOB_TYPE_INVALID			0
-#define JOB_TYPE_HELLO				1
-#define JOB_TYPE_L2_STAT_REQ			2
-#define JOB_TYPE_ENB_CONFIG_REQ			3
-#define JOB_TYPE_UE_CONFIG_REQ			4
+#define JOB_TYPE_SEND				1
+#define JOB_TYPE_HELLO				2
+#define JOB_TYPE_L2_STAT_REQ			3
+#define JOB_TYPE_ENB_CONFIG_REQ			4
+#define JOB_TYPE_UE_CONFIG_REQ			5
+#define JOB_TYPE_UEs_LOG_TRIGGER		6
 
 #include <time.h>
 #include <pthread.h>
@@ -43,7 +45,7 @@ struct sched_job {
 
 	/* Data arguments for this job. */
 	void * args;
-	/* Setting this to 1 cause the job to be automatically re-scheduled. */
+	/* Setting this to -1 cause the job to be automatically re-scheduled. */
 	int reschedule;
 
 	/* Time when the job has been enqueued. */
@@ -82,3 +84,4 @@ int sched_start(struct sched_context * sched);
 int sched_stop(struct sched_context * sched);
 
 #endif /* __EMAGE_SCHEDULER_H */
+

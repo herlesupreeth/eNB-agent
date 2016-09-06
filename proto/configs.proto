@@ -14,103 +14,15 @@
  */
 
 /*
- * This file carries the definition of the configuration messages 
+ * This file carries the definition of the configuration messages
  * exchanged between an Empower agent and an Empower controller.
  */
 
-syntax = "proto2"; 
+syntax = "proto2";
 
 ///////////////////////////////////////////////////////////////////////////////
 //								ENUMS										//
 ///////////////////////////////////////////////////////////////////////////////
-
-//
-// Types of configuration related messages requested/sent by the controller.
-//
-enum config_msg_type {
-	// eNB configuration request.
-	ENB_CONF_REQUEST = 0;
-	// eNB configuration reply.
-	ENB_CONF_REPLY = 1;
-	// UE configuration request.
-	UE_CONF_REQUEST = 2;
-	// UE configuration reply.
-	UE_CONF_REPLY = 3;
-}
-
-//
-// Types of frequency hopping modes in the LTE.
-//
-enum hopping_mode {
-	// Inter subframe hopping.
-	HM_INTER = 0;
-	// Intra subframe hopping.
-	HM_INTERINTRA = 1;
-}
-
-//
-// Amount of PHICH resource used.
-//
-enum phich_resource {
-	// One-sixth.
-	PR_ONE_SIXTH = 0;
-	// Half.
-	PR_HALF = 1;
-	// One.
-	PR_ONE = 2;
-	// Two.
-	PR_TWO = 3;
-}
-
-//
-// Type of cyclic prefix, which help in PHICH duration determination.
-//
-enum phich_duration {
-	// PHICH duration for Normal cyclic prefix.
-	PHICH_DUR_NORMAL = 0;
-	// PHICH duration for Extended cyclic prefix.
-	PHICH_DUR_EXTENDED = 1;
-}
-
-//
-// Type of cyclic prefix used in uplink.
-//
-enum ul_cyclic_prefix_length {
-	// Normal cyclic prefix.
-	UL_PREFIX_NORMAL = 0;
-	// Extended cyclic prefix.
-	UL_PREFIX_EXTENDED = 1;
-}
-
-//
-// Type of cyclic prefix used in downlink.
-//
-enum dl_cyclic_prefix_length {
-	// Normal cyclic prefix.
-	DL_PREFIX_NORMAL = 0;
-	// Extended cyclic prefix.
-	DL_PREFIX_EXTENDED = 1;
-}
-
-//
-// Type of duplex mode used.
-//
-enum duplex_mode {
-	// Time Division Duplex (TDD).
-	DM_TDD = 0;
-	// Frequency Division Duplex (FDD).
-	DM_FDD = 1;
-}
-
-//
-// Type of QAM mode used.
-//
-enum qam {
-	// 16 Qaudrature Amplitude Modulation.
-	MOD_16QAM = 0;
-	// 64 Qaudrature Amplitude Modulation.
-	MOD_64QAM = 1;
-}
 
 //
 // Types of measurement gap pattern configured in RRC.
@@ -125,93 +37,228 @@ enum meas_gap_pattern {
 }
 
 //
-// Types of operations, which are required for configuring Scheduling Request 
-// and CQI.
+// RRC states of UE.
 //
-enum setup_release_action {
-	// Setup action.
-	SRA_SETUP = 0;
-	// Release action.
-	SRA_RELEASE = 1;
+enum rrc_state {
+	// UE not attached with eNB.
+	RS_RRC_INACTIVE = 0;
+	// UE is not active.
+	RS_RRC_IDLE = 1;
+	// UE has received SI.
+	RS_RRC_SI_RECEIVED= 2;
+	// UE is attached to eNB.
+	RS_RRC_CONNECTED = 3;
+	// UE is active.
+	RS_RRC_RECONFIGURED = 4;
+	// UE is process of HO.
+	RS_RRC_HO_EXECUTION = 5;
 }
 
 //
-// Types of UE transmission antenna. Related to power control.
+// RAT types for RRC measurements. For now only EUTRAN measurement is supported.
 //
-enum ue_transmission_antenna {
-	UETA_NONE = 0;
-	UETA_OPEN_LOOP = 1;
-	UETA_CLOSED_LOOP = 2;
+enum allowed_meas_bw {
+	// 6 resource block of bandwidth.
+	AMBW_6 = 0;
+	// 15 resource block of bandwidth.
+	AMBW_15 = 1;
+	// 25 resource block of bandwidth.
+	AMBW_25 = 2;
+	// 50 resource block of bandwidth.
+	AMBW_50 = 3;
+	// 75 resource block of bandwidth.
+	AMBW_75 = 4;
+	// 100 resource block of bandwidth.
+	AMBW_100 = 5;
 }
 
 //
-// Types of UE transmission mode.
+// Cell or frequency offset ranges in dB (-24 to 24 dB).
 //
-enum ue_transmission_mode {
-	UETM_TM1 = 0;
-	UETM_TM2 = 1;
-	UETM_TM3 = 2;
-	UETM_TM4 = 3;
-	UETM_TM5 = 4;
-	UETM_TM6 = 5;
-	UETM_TM7 = 6;
-	UETM_TM8 = 7;
+enum Q_offset_range {
+	QOR_dB_24 = 0;
+	QOR_dB_22 = 1;
+	QOR_dB_20 = 2;
+	QOR_dB_18 = 3;
+	QOR_dB_16 = 4;
+	QOR_dB_14 = 5;
+	QOR_dB_12 = 6;
+	QOR_dB_10 = 7;
+	QOR_dB_8 = 8;
+	QOR_dB_6 = 9;
+	QOR_dB_5 = 10;
+	QOR_dB_4 = 11;
+	QOR_dB_3 = 12;
+	QOR_dB_2 = 13;
+	QOR_dB_1 = 14;
+	QOR_dB0 = 15;
+	QOR_dB1 = 16;
+	QOR_dB2 = 17;
+	QOR_dB3 = 18;
+	QOR_dB4 = 19;
+	QOR_dB5 = 20;
+	QOR_dB6 = 21;
+	QOR_dB8 = 22;
+	QOR_dB10 = 23;
+	QOR_dB12 = 24;
+	QOR_dB14 = 25;
+	QOR_dB16 = 26;
+	QOR_dB18 = 27;
+	QOR_dB20 = 28;
+	QOR_dB22 = 29;
+	QOR_dB24 = 30;
 }
 
 //
-// Types of aperiodic CQI reporting mode.
+// Range used for encode either a single or a range of physical cell identities.
 //
-enum aperiodic_cqi_report_mode {
-	ACRM_RM12 = 0;
-	ACRM_RM20 = 1;
-	ACRM_RM22 = 2;
-	ACRM_RM30 = 3;
-	ACRM_RM31 = 4;
-	ACRM_NONE = 5;
+enum pci_range {
+	// 4 consecutive physical cell identities.
+	PCIR_n4	= 0;
+	// 8 consecutive physical cell identities.
+	PCIR_n8	= 1;
+	// 12 consecutive physical cell identities.
+	PCIR_n12 = 2;
+	// 16 consecutive physical cell identities.
+	PCIR_n16 = 3;
+	// 24 consecutive physical cell identities.
+	PCIR_n24 = 4;
+	// 32 consecutive physical cell identities.
+	PCIR_n32 = 5;
+	// 48 consecutive physical cell identities.
+	PCIR_n48 = 6;
+	// 64 consecutive physical cell identities.
+	PCIR_n64 = 7;
+	// 84 consecutive physical cell identities.
+	PCIR_n84 = 8;
+	// 96 consecutive physical cell identities.
+	PCIR_n96 = 9;
+	// 128 consecutive physical cell identities.
+	PCIR_n128 = 10;
+	// 168 consecutive physical cell identities.
+	PCIR_n168 = 11;
+	// 252 consecutive physical cell identities.
+	PCIR_n252 = 12;
+	// 504 consecutive physical cell identities.
+	PCIR_n504 = 13;
+	// Spare 2 consecutive physical cell identities.
+	PCIR_spare2	= 14;
+	// Spare 1 consecutive physical cell identities.
+	PCIR_spare1	= 15;
 }
 
 //
-// Types of ACK/NACK feedback mode in TDD.
+// Value range used for time to trigger parameter. Parameter specified in
+// number of milliseconds.
 //
-enum tdd_ack_nack_feedback_mode {
-	TANFM_BUNDLING = 0;
-	TANFM_MULTIPLEXING = 1;
+enum time_to_trigger {
+	TTRIG_ms0 = 0;
+	TTRIG_ms40 = 1;
+	TTRIG_ms64 = 2;
+	TTRIG_ms80 = 3;
+	TTRIG_ms100 = 4;
+	TTRIG_ms128 = 5;
+	TTRIG_ms160 = 6;
+	TTRIG_ms256 = 7;
+	TTRIG_ms320 = 8;
+	TTRIG_ms480 = 9;
+	TTRIG_ms512 = 10;
+	TTRIG_ms640 = 11;
+	TTRIG_ms1024 = 12;
+	TTRIG_ms1280 = 13;
+	TTRIG_ms2560 = 14;
+	TTRIG_ms5120 = 15;
 }
 
 //
-// States in which an UE can be during its lifecycle in eNB.
+// Purposes of periodic reporting of RRC measurements.
 //
-enum ue_state {
-	// UE inactive state.
-	UES_RRC_INACTIVE = 0;
-	// UE in idle state.
-	UES_RRC_IDLE = 1;
-	// UE received System Info state.
-	UES_RRC_SI_RECEIVED = 2;
-	// RRC Connected state.
-	UES_RRC_CONNECTED = 3;
-	// RRC Reconfigured state.
-	UES_RRC_RECONFIGURED = 4;
-	// UE is handed over.
-	UES_RRC_HO_EXECUTION = 5;
+enum periodic_rep_purpose {
+	// Report strongest cells in the neighborhood.
+	PERRP_REPORT_STRONGEST_CELLS = 0;
+	// Report Cell Global Identifier of cells in neighborhood.
+	PERRP_REPORT_CGI_INFO = 1;
 }
 
 //
-// Configuration of different layers that could be requested by the controller.
+// Quantity to be used as reference for triggering the event.
 //
-enum layer_config {
-	// Configuration of all layers.
-	LC_ALL = 1;
-	// Configuration of PHY layer related parameters.
-	LC_PHY = 2;
-	// Configuration of MAC layer related parameters.
-	LC_MAC = 4;
-	// Configuration of RRC layer related parameters.
-	LC_RRC = 8;
+enum trigger_quantity {
+	// RSRP based triggered event.
+	TRIGQ_RSRP = 0;
+	// RSRQ based triggered event.
+	TRIGQ_RSRQ = 1;
+}
+
+//
+// Quantity to be reported while reporting the RRC measurements.
+//
+enum report_quantity {
+	// Report same element as triggerd quantity.
+	REPQ_SAME_AS_TRIGGER_QUANT = 0;
+	// Report both RSRP and RSRQ.
+	REPQ_BOTH = 1;
+}
+
+//
+// Interval between periodical reports. Parameter specified in
+// number of time units.
+//
+enum report_interval {
+	REPINT_ms120 = 0;
+	REPINT_ms240 = 1;
+	REPINT_ms480 = 2;
+	REPINT_ms640 = 3;
+	REPINT_ms1024 = 4;
+	REPINT_ms2048 = 5;
+	REPINT_ms5120 = 6;
+	REPINT_ms10240 = 7;
+	REPINT_min1 = 8;
+	REPINT_min6 = 9;
+	REPINT_min12 = 10;
+	REPINT_min30 = 11;
+	REPINT_min60 = 12;
+	REPINT_spare3 = 13;
+	REPINT_spare2 = 14;
+	REPINT_spare1 = 15;
+}
+
+//
+// Number of measurement report that needs to be reported in total for a
+// configured measurement.
+//
+enum report_amount {
+	REPAMT_1 = 0;
+	REPAMT_2 = 1;
+	REPAMT_4 = 2;
+	REPAMT_8 = 3;
+	REPAMT_16 = 4;
+	REPAMT_32 = 5;
+	REPAMT_64 = 6;
+	REPAMT_infinity = 7;
+}
+
+//
+// Setup or release the measurement of UE Rx Tx time difference. Requires
+// UE with Rel.9 and above. Applicable only in EUTRA measurements.
+//
+enum ue_rxtx_time_difference {
+	// Setup the time difference measurement.
+	UERXTXTD_SETUP = 0;
+}
+
+//
+// Status of the request for a particular configuration. Success or failure.
+//
+enum conf_req_status {
+	// Successfully received response for request.
+	CREQS_SUCCESS = 0;
+	// Failed to receive response for request.
+	CREQS_FAILURE = 1;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-//																			//
+// 																			//
 ///////////////////////////////////////////////////////////////////////////////
 
 
@@ -220,394 +267,298 @@ enum layer_config {
 ///////////////////////////////////////////////////////////////////////////////
 
 //
-// Message definition for request of eNB configuration.
+// Message definition for request of RRC measurements configuration of a UE.
 //
-message enb_config_request {
-	// Configuration of different layers.
-	// Bitmap of "layer_config" type.
-	optional uint32 layer = 1;
-	// List of CC (Component Carrier) ids for which configuration are needed.
-	// Leave it empty to request all cc ids configuraiton.
-	repeated uint32 cc_id = 2;
-}
-
-//
-// Message definition for request of UEs configuration.
-//
-message ue_config_request {
-	// Configuration of different layers.
-	// Bitmap of "layer_config" type.
-	optional uint32 layer = 1;
-	// List of RNTIs of UEs for which configuration are needed.
-	// Radio Network Temporary Identifier (RNTI).
-	// Leave it empty to request all UEs configuration.
-	repeated uint32 rnti = 2;
-}
-
-//
-// Message definition for configuration of System Information (SI) messages.
-//
-message si_info_msg {
-	// Periodicity of SI message in radio frames.
-	optional uint32 periodicity = 1;
-	// The length of the SI message in bytes.
-	optional uint32 length = 2;
-}
-
-//
-// Message definition for configuration of System information.
-//
-message si_info_config {
-	// System Frame number.
-	optional uint32 sfn = 1;
-	// Length of System Information Block 1 in bytes.
-	optional uint32 sib1_len = 2;
-	// Scheduling window for all SIs in subframes.
-	optional uint32 si_window_len = 3;
-	// List of SI messages to be sent.
-	// The index of the list identifies the type of an SI message.
-	// 0 - SIB1
-	// 1..31 - SIx
-	// 32..63 - PCCH
-	repeated si_info_msg si_message = 4;
-
-}
-
-//
-// Message definition for physical layer related configuration of a cell.
-//
-message cell_phy_config {
-	// Physical cell id of this cell.
-	optional uint32 pci = 1;
-	// PLMN cell id of this cell.
-	optional uint32 cell_id = 2;
-	// PUSCH resources in RBs for hopping.
-	// PUSCH = Physical Uplink Shared channel.
-	// RB = Resource block.
-	optional uint32 pusch_hopp_offset = 3;
-	// Type of hopping mode used.
-	optional hopping_mode hopp_mode = 4;
-	// Number of subbands.
-	optional uint32 n_sb = 5;
-	// Number of REGs used for PHICH.
-	// Resource Element Group (REG). 1 REG = 4 Resource Elements (RE)
-	// Physical channel HybridARQ Indicator Channel (PHICH).
-	optional phich_resource phich_res = 6;
-	// PHICH duration used.
-	optional phich_duration phich_dur = 7;
-	// Number of OFDM symbols possible to use for PDCCH in a subframe.
-	// Refer TS 36.211, section 6.9.
-	optional uint32 init_nr_PDCCH_OFDM_sym = 8;
-	// System Information (SI) configuration.
-	optional si_info_config si_conf = 9;
-	// Downlink transmission bandwidth in RBs.
-	optional uint32 dl_bw = 10;
-	// Uplink transmission bandwidth in RBs.
-	optional uint32 ul_bw = 11;
-	// Cyclic prefix length used in uplink.
-	optional ul_cyclic_prefix_length ul_cyc_prefix_len = 12;
-	// Cyclic prefix length used in downlink.
-	optional dl_cyclic_prefix_length dl_cyc_prefix_len = 13;
-	// Number of cell specific antenna ports.
-	optional uint32 antenna_ports_count = 14;
-	// Type of duplex mode used.
-	optional duplex_mode dupl_mode = 15;
-	// Physical Random Access Channel (PRACH) configuration index.
-	// Refer TS 36.211, section 5.7.1.
-	optional uint32 prach_conf_index = 16;
-	// Physical Random Access Channel (PRACH) frequency offset.
-	// Refer TS 36.211, section 5.7.1.
-	optional uint32 prach_freq_offset = 17;
- 	// The duration of the Random Access (RA) response window in subframes.
-	optional uint32 ra_resp_window_size = 18;
-	// Resource index for ACK/NACK.
-	// Refer TS 36.213, section 10.1.
-	optional uint32 n1PUCCH_AN = 19;
-	// Number of equally spaced cyclic time shifts.
-	// Refer TS 36.211, section 5.4.
-	optional uint32 deltaPUCCH_shift = 20;
-	// 64 QAM is enabled or not.
-	optional qam enable_64QAM = 21;
-}
-
-//
-// Message definition for MAC layer related configuration of a cell.
-//
-message cell_mac_config {
-	// DL/UL subframe assignment. TDD only.
-	optional uint32 sf_assign = 1;
-	// Special subframe pattern. TDD only. Refer TS 36.211, table 4.2.1.
-	optional uint32	special_subframe_patterns = 2;
-	// Timer for RA. MAC contention resolution timer.
-	optional uint32 mac_cont_resol_timer = 3;
-	// Maximum Hybrid ARQ for Msg3 transmission. Refer TS 36.321.
-	optional uint32 max_HARQ_Msg3Tx = 4;
-	// n Resource Blocks CQI. Refer TS 36.211, section 5.4.
-	optional uint32 nRB_cqi = 5;
-}
-
-//
-// Message definition for RRC layer related configuration of a cell.
-//
-message cell_rrc_config {
-	// Radio Frame meeting the following equation is allocated for MBSFN.
-	// SFN mod radioframeAllocationPeriod = radioframeAllocationOffset
-	// Configuration of MBSFN radio frame period in SIB2.
-	// Multimedia Broadcast Single Frequency network (MBSFN)
-	repeated uint32 mbsfn_conf_rfperiod = 1;
-	// Configuration of MBSFN radio frame offset in SIB2.
-	repeated uint32 mbsfn_conf_rfoffset = 2;
-	// Bitmap indicating subframes that are allocated for MBSFN 
-	// within the MBSFN frame.
-	repeated uint32 mbsfn_conf_sfalloc = 3;
-	// SRS subframe configuration in SIB2. Refer TS 36.211, table 5.5.3.3-1 & 2.
-	// Sounding Reference Signal (SRS).
-	optional uint32 srs_sf_conf = 4;
-	// SRS bandwidth configuration in SIB2. Refer TS 36.211, section 5.5.3.2.
-	optional uint32 srs_bw_conf = 5;
-	// SRS maximum uplink pilot time slot.
-	// Boolean value. Refer TS 36.211, section 5.5.3.2. TDD only
-	optional uint32 srs_max_up_pts = 6;
-}
-
-//
-// Message definition for cell configuration in an eNB.
-//
-message cell_config {
-	// Component Carrier (CC) index.
-	optional uint32 cc_id = 1;
-	// Physical layer related configuration of the cell.
-	optional cell_phy_config phy_conf = 2;
-	// MAC layer related configuration of the cell.
-	optional cell_mac_config mac_conf = 3;
-	// RRC layer related configuration of the cell.
-	optional cell_rrc_config rrc_conf = 4;
-}
-
-//
-// Message definition of reply for eNB configuration request.
-//
-message enb_config_reply {
-	// List of configuraiton of all or requested cells.
-	repeated cell_config cell_conf = 1;
-}
-
-//
-// Message definition for configuration of discontinuos reception in RRC.
-//
-message drx_config {
-	// Duration of 'ON time' within one DRX cycle in subframes.
-	// Refer TS 36.321.
-	optional uint32 on_dur_timer = 1;
-	// Time in subframes for how long UE should remain 'ON' after 
-	// the reception of a PDCCH. Refer TS 36.321.
-	optional uint32 drx_inact_timer = 2;
-	// Time in subframes, maximum number of consecutive PDCCH subframes the UE 
-	// should remain active to wait an incoming retransmission. Refer TS 36.321.
-	optional uint32 drx_retrx_timer = 3;
-	// Long DRX cycle. Specified in subframes. Refer TS 36.321.
-	optional uint32 long_drx_cycle = 4;
-	// Long DRX start offset. Used to calculate DRX cycle. Refer TS 36.321.
-	optional uint32 long_drx_cycle_start_offset = 5;
-	// DRX cycle which can be implemented within the 'OFF' period of a 
-	// long DRX Cycle. Specified in subframes.
-	optional uint32 short_drx_cycle = 6;
-	// The consecutive number of subframes the UE shall follow the short DRX
-	// cycle after the DRX Inactivity Timer has expired. Specified in subframes.
-	optional uint32 drx_short_cycle_timer = 7;
-}
-
-//
-// Message definition for configuration of semi-persistent scheduling in RRC.
-//
-message sps_config {
-	// SPS UL scheduling interval in subframes.
-	// SPS = Semi-Persistent Scheduling.
-	optional uint32 sps_interval_ul = 1;
-	// SPS DL scheduling interval in subframes.
-	optional uint32 sps_interval_dl = 2;
-	// Number of SPS HARQ processes. Refer TS 36.321.
-	optional uint32 n_conf_sps_proc = 3;
-	// Index to one of the four PUCCH resource values. Refer TS 36.213.
-	repeated uint32 n1_PUCCH_AN_persistent_element = 4;
-	// Number of empty transmissions before release of SPS.
-	optional uint32 implicit_release_after = 5;
-}
-
-//
-// Message definition for configuration of SR (Scheduling Request) in MAC.
-//
-message sr_config {
-	// Indicates if SR config should be changed or released.
-	optional setup_release_action sr_action = 1;
-	// SR scheduling interval in subframes.
-	optional uint32 sched_inter = 2;
-	// Maximum number of SR transmission count. Refer 36.321 5.4.4 SR.		
-	optional uint32 dsr_trans_max = 3;
-}
-
-//
-// Message definition for configuration of CQI in RRC.
-//
-message cqi_config {
-	// Indicats if CQI changed or released.
-	optional setup_release_action cqi_action = 1;
-	// CQI scheduling interval in subframes.
-	optional uint32 cqi_sched_inter = 2;
-	// Rank Indication scheduling interval in subframes.
-	optional uint32 ri_sched_inter = 3;
+message ue_rrc_meas_conf_req {
+	// RNTI of UE for which configuration is needed.
+	required uint32 rnti = 1;
 }
 
 //
 // Message definition for UE capabilities.
 //
 message ue_capabilities {
-	// Boolean value. Only half duplex support. FDD operation
-	repeated uint32 half_duplex = 1;
 	// Supported LTE bands.
-	repeated uint32 band = 2;
-	// Boolean value. Support for intra-subframe hopping.
-	optional uint32 intra_SF_hopping = 3;
-	// Support for type 2 hopping with n_sb > 1
-	optional uint32 type2_sb_1 = 4;
-	// Category of the UE.
-	optional uint32 ue_category = 5;
-	// Boolean value. UE support for resource allocation type 1.
-	optional uint32 res_alloc_type1 = 6;
+	repeated uint32 band = 1;
+	// 3GPP release implementation in UE.
+	optional uint32 release_3gpp = 2;
 }
 
 //
-// Message definition for Secondary Cell (SCell) configuration.
+// Message definition for cell info for which RRC EUTRA measurements needs
+// to be reported.
 //
-message scell_config {
-	// Component Carrier identifier.
-	optional uint32 cc_id = 1;
-	// Index of this Scell (RRC SCellIndex)
-	optional uint32 scell_index = 2;
-	// Boolean value. Indicates if cross-carrier scheduling is used 
-	// by this SCell.
-	optional uint32 use_ccs = 3;			
-	// Index of the cell responsible for scheduling this SCell if 
-	// cross-carrier scheduling is enabled.
-	optional uint32 sched_cell_index = 4;
-	// Start of OFDM symbol of PDSCH data region for this SCell.
-	optional uint32 pdsch_start = 5;
+message cells_to_measure {
+	// Physical Cell identifier.
+	optional uint32 phy_cell_id = 1;
+	// Cell or frequency specific offset to be applied when evaluating
+	// triggering conditions for measurement reporting.
+	optional Q_offset_range offset_range = 2;
 }
 
 //
-// Message definition for physical layer related configuration of a UE.
+// Message definition for cell info for which RRC measurements must not be done.
 //
-message ue_phy_config {
-	// Scheduling Request configuration.
-	optional sr_config sr_conf = 1;
-	// Transmission mode 1 (single antenna), 2 (transmit diversity), etc.
-	optional ue_transmission_mode transmission_mode = 2;
-	// UE transmission antenna type. Related to power control.
-	optional ue_transmission_antenna ue_trx_antenna = 3;
+message blacklist_cells {
+	// Strating Physical Cell identifier.
+	optional uint32 start_pci = 1;
+	// Number of consecutive physical cell identities (including start).
+	optional pci_range range = 2;
 }
 
 //
-// Message definition for MAC layer related configuration of a UE.
+// Message definition for measurment object configuration for
+// EUTRA RRC measurements request.
 //
-message ue_mac_config {
-	// Timer in SF. Control the synchronization status of the UE, not the 
-	// actual advance procedure. Refer TS 36.321.
-	optional uint32 time_alignment_timer = 1;
-	// Boolean value. Transmission Time Interval bundling enable or disable.
-	optional uint32 tti_bundling = 2;
-	// Maximum HARQ retransmission for UL.
-	optional uint32 max_HARQ_tx = 3;
-	// Boolean value. Refer TS 36.213
-	optional uint32 ack_nack_simultaneous_trans = 4;
-	// Boolean value. Refer TS 36.213
-	optional uint32 simultaneous_ack_nack_cqi = 5;
-	// Types of aperiodic CQI reporting mode.
-	optional aperiodic_cqi_report_mode aper_cqi_rep = 6; 
+message meas_obj_EUTRA {
+	// Carrier frequency on which measurements should be carried out.
+	optional uint32 carrier_freq = 1;
+	// Maximum allowed measurement bandwidth on a carrier frequency.
+	optional allowed_meas_bw meas_bw = 2;
+	// Cells for which measurements must be fetched.
+	repeated cells_to_measure cells = 3;
+	// Blacklisted cells for which measurements must not be fetched.
+	repeated blacklist_cells bkl_cells = 4;
 }
 
 //
-// Message definition for RRC layer related configuration of a UE.
+// Message definition for RRC measurement object configuration.
 //
-message ue_rrc_config {
-	// Discontinuos reception (DRX) configuration.
-	optional drx_config drx_conf = 1;
-	// Measurement gap configuration. Refer TS 36.133.
-	optional meas_gap_pattern meas_gap_patt = 2;
+message meas_object {
+	// Measurement Object identifier. ID range from (1-32) and 0 means not set.
+	required int32 measObjId = 1 [default = 0];
+	// Measurement object configuration.
+	oneof meas_obj {
+		// Measurement object for EUTRA RRC measurements.
+		meas_obj_EUTRA measObj_EUTRA = 2;
+		// Measurement object for UTRA RRC measurements.
+		//meas_obj_UTRA measObj_UTRA = 3;
+		// Measurement object for GERAN RRC measurements.
+		//meas_obj_GERAN measObj_GERAN = 4;
+		// Measurement object for CDMA2000 RRC measurements.
+		//meas_obj_CDMA2000 measObj_CDMA2000 = 5;
+		// For now only EUTRAN measurements are supported.
+	}
+}
+
+//
+// Message definition for report configuration for periodical
+// RRC measurements.
+//
+message rep_conf_per {
+	// Purpose of periodic RRC measurements.
+	optional periodic_rep_purpose purpose = 1;
+}
+
+//
+// Message definition for threshold to be used in EUTRA measurement report
+// triggering condition for event.
+//
+message threshold_EUTRA {
+	// RSRP or RSRQ threshold values used in triggering event.
+	oneof threshold {
+		// Threshold RSRP value.
+		int32 RSRP = 1;
+		// Threshold RSRQ value.
+		int32 RSRQ = 2;
+	}
+}
+
+//
+// Message definition for report configuration for A1 event based
+// RRC measurements.
+// Event: Serving becomes better than absolute threshold.
+//
+message rep_conf_a1 {
+	// Threshold to be used in EUTRA measurement report triggering
+	// condition for event.
+	optional threshold_EUTRA a1_threshold = 1;
+}
+
+//
+// Message definition for report configuration for A2 event based
+// RRC measurements.
+// Event: Serving becomes worse than absolute threshold.
+//
+message rep_conf_a2 {
+	// Threshold to be used in EUTRA measurement report triggering
+	// condition for event.
+	optional threshold_EUTRA a2_threshold = 1;
+}
+
+//
+// Message definition for report configuration for A3 event based
+// RRC measurements.
+// Event: Neighbour becomes amount of offset better than PCell.
+//
+message rep_conf_a3 {
+	// Offset used in EUTRA measurement report triggering
+	// condition for event.
+	optional int32 a3_offset = 1;
+	// Flag used to denote whether to report measurement on leave condition
+	// of event.
+	optional uint32 report_on_leave = 2;
+}
+
+//
+// Message definition for report configuration for A4 event based
+// RRC measurements.
+// Event: Neighbour becomes better than absolute threshold.
+//
+message rep_conf_a4 {
+	// Threshold to be used in EUTRA measurement report triggering
+	// condition for event.
+	optional threshold_EUTRA a4_threshold = 1;
+}
+
+//
+// Message definition for report configuration for A5 event based
+// RRC measurements.
+// Event: PCell becomes worse than absolute threshold1 AND Neighbour becomes
+// better than another absolute threshold2.
+//
+message rep_conf_a5 {
+	// Threshold to be used in EUTRA measurement report triggering
+	// condition for event.
+	optional threshold_EUTRA a5_threshold1 = 1;
+	// Threshold to be used in EUTRA measurement report triggering
+	// condition for event.
+	optional threshold_EUTRA a5_threshold2 = 2;
+}
+
+//
+// Message definition for RRC measurement Report Configuration EUTRA object.
+//
+message rep_conf_EUTRA {
+	oneof conf_EUTRA {
+		// Periodical report configuration.
+		rep_conf_per peridical = 1;
+		// A1 event report configuration.
+		rep_conf_a1 a1 = 2;
+		// A2 event report configuration.
+		rep_conf_a2 a2 = 3;
+		// A3 event report configuration.
+		rep_conf_a3 a3 = 4;
+		// A4 event report configuration.
+		rep_conf_a4 a4 = 5;
+		// A5 event report configuration.
+		rep_conf_a5 a5 = 6;
+	}
+	// Parameter used within the entry and leave condition of an event
+	// triggered reporting condition. Range INTEGER (0..30).
+	optional int32 hysteresis = 7;
+	// Time during which specific criteria for the event needs to be
+	// met in order to trigger a measurement report.
+	optional time_to_trigger trigg_time = 8;
+	// Quantity to be used as reference for triggering the event.
+	optional trigger_quantity trigg_quant = 9;
+	// Quantity to be reported while reporting the RRC measurements.
+	optional report_quantity report_quant = 10;
+	// Max number of cells that needs to be be considered for reporting.
+	optional uint32 max_rep_cells = 11;
+	// Interval between periodical reports.
+	optional report_interval rep_interval = 12;
+	// Number of RRC measurements reports to be reported for the configured
+	// measurement.
+	optional report_amount rep_amount = 13;
+	// Setup or release the measurement of UE Rx Tx time difference.
+	// Requires UE with Rel.9 and above. Applicable only in EUTRA measurements.
+	optional ue_rxtx_time_difference ue_rxtx_time_diff = 14;
+}
+
+//
+// Message definition for RRC measurement Report Configuration object.
+//
+message report_config {
+	// Report Configuration identifier.
+	// ID range from (1-32) and 0 means not set.
+	required int32 reportConfId = 1 [default = 0];
+	// Measurement report configuration.
+	oneof rep_conf {
+		// Report Configuration for EUTRA.
+		rep_conf_EUTRA rc_EUTRA = 2;
+		// Report Configuration for RAT other than EUTRA.
+		//rep_conf_INTERRAT rc_INTERRAT = 3;
+	}
+}
+
+//
+// Message definition for RRC Measurement Identifier object.
+//
+message meas_identifier {
+	// Measurement id.
+	required int32 id = 1;
+	// Measurement Object Id to associate with this measurement.
+	required int32 measObj_id = 2;
+	// Report Configuration Id to associate with this measurement.
+	required int32 report_conf_id = 3;
+}
+
+//
+// Message definition for RRC measurements configuration of a UE.
+//
+message ue_rrc_meas_conf_repl {
+	// RNTI of UE.
+	required uint32 rnti = 1;
+	// Status of UE RRC measurement configuration request. Success or Failure.
+	required conf_req_status status = 2;
+	// RRC state of the UE.
+	optional rrc_state ue_rrc_state = 3;
+	// Measurement gap configuration in RRC reconfiguration message.
+	optional meas_gap_pattern meas_gap_patt = 4;
 	// Measurement gap offset if measurement gap is configured.
-	optional uint32 meas_gap_config_sf_offset = 3;
-	// Semi-Persistent Scheduling configuration.
-	optional sps_config sps_conf = 4;
-	// CQI configuration (Optional)
-	optional cqi_config cqi_conf= 5;
-	// Aggregated bit-rate of non-gbr bearer per UE. Refer TS 36.413.
-	optional uint64 ue_aggreg_max_bitrate_UL = 6;
-	// Aggregated bit-rate of non-gbr bearer per UE. Refer TS 36.413.
-	optional uint64 ue_aggreg_max_bitrate_DL = 7;
+	optional uint32 meas_gap_config_sf_offset = 5;
 	// UE capabilities information.
-	optional ue_capabilities capabilities = 8;
-	// Offset index value for HARQ-ACK. Refer TS 36.213.
-	optional uint32 beta_offset_ACK_index = 9;
-	// Offset index value for Rank Indication. Refer TS 36.213.
-	optional uint32 beta_offset_RI_index = 10;
-	// Offset index value for CQI. Refer TS 36.213.
-	optional uint32 beta_offset_CQI_index = 11;
-	// Secondary cells configurations.
-	repeated scell_config scell_conf = 12;
-	// Deactivation timer for secondary cell.
-	optional uint32 scell_deactivation_timer = 13;
-	// Type of ACK/NACK feedback mode in TDD.
-	optional tdd_ack_nack_feedback_mode tdd_ack_nack_feedb = 14;
-	// Repition factor set for ACK/NACK. Refer TS 36.213, section 10.1.
-	optional uint32 ack_nack_rep_factor = 15;
-	// Boolean value. Extended BSR size enable or disable.
-	optional uint32 extended_bsr_size = 16;
-	// Boolean value. Support for carrier aggregation
-	optional uint32 ca_support = 17;
-	// Boolean value. Support for cross carrier scheduling.
-	optional uint32 cross_carrier_sched_supp = 18;
-	// Component Carrier id of primary cell.
-	optional uint32 pcell_cc_id = 19;
+	optional ue_capabilities capabilities = 6;
+	// Measurement object configurations.
+	repeated meas_object m_obj = 7;
+	// Measurement report configuration.
+	repeated report_config r_conf = 8;
+	// Measurement identifers.
+	repeated meas_identifier meas_id = 9;
 }
 
 //
-// Message definition for UE configuration.
+// RRC measurements configurations message: Triggered or single event type.
 //
-message ue_config {
-	// RNTIs of UE for which configuration are needed.
-	optional uint32 rnti = 1; 
-	// State of the UE in eNB.
-	optional ue_state state = 2;
-	// Physical layer related configuration of the UE.
-	optional ue_phy_config phy_conf = 3;
-	// MAC layer related configuration of the UE.
-	optional ue_mac_config mac_conf = 4;
-	// RRC layer related configuration of the UE.
-	optional ue_rrc_config rrc_conf = 5;
+message ue_rrc_meas_conf {
+	// Types of rrc measurements configuration messages.
+	oneof ue_rrc_meas_conf_m {
+		// Request message for UE's rrc measurements configuration.
+		ue_rrc_meas_conf_req req = 1;
+		// Reply message with UE's rrc measurements configuration.
+		ue_rrc_meas_conf_repl repl = 2;
+	}
 }
 
 //
-// Message definition of reply for UE configuration request.
+// Message definition for request of identifiers of all the UEs registered.
 //
-message ue_config_reply {
-	// List of configuraiton of all or requested UEs.
-	repeated ue_config ue_conf = 1;
+message ues_id_req {
+
 }
 
 //
-// Common configurations message to identify the type of configurations.
+// Message definition for identifiers of all the UEs.
 //
-message configs {
-	// Type of 2nd level message.
-	optional config_msg_type type = 100;
-	// Types of configuration messages.
-	oneof config_msg {
-		// Request message for eNB configuration.
-		enb_config_request enb_conf_req = 1;
-		// Reply message with eNB configuration.
-		enb_config_reply enb_conf_repl = 2;
-		// Request message for UEs configuration.
-		ue_config_request ue_conf_req = 3;
-		// Reply message with UEs configuration.
-		ue_config_reply ue_conf_repl = 4;
+message ues_id_repl {
+	// Status of UEs ID request. Success or Failure.
+	required conf_req_status status = 1;
+	// Active UE RNTIs.
+	repeated uint32 active_rnti = 2;
+	// Inactive UE RNTIs.
+	repeated uint32 inactive_rnti = 3;
+}
+
+//
+// Message definition for getting UEs registered in eNB.
+//
+message ues_id {
+	// Request and response for UEs identifier for all UEs.
+	oneof ues_id_m {
+		// Request message for identifiers of all the UEs registered.
+		ues_id_req req = 1;
+		// Reply message with identifiers of all the UEs registered.
+		ues_id_repl repl = 2;
 	}
 }

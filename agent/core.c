@@ -43,6 +43,8 @@
 #include "net.h"
 #include "sched.h"
 
+#include <emage/pb/main.pb-c.h>
+
 /* Static location of the configuration file. */
 #define EM_CONFIG_FILE			"/etc/empower/agent.conf"
 
@@ -60,6 +62,55 @@ pthread_spinlock_t em_agents_lock;
 /******************************************************************************
  * Misc.                                                                      *
  ******************************************************************************/
+
+/* Schedule the send of a message. */
+int add_send_job(struct agent * a, EmageMsg * msg) {
+	struct sched_job * s = 0;
+
+	int status = -1;
+
+	s = malloc(sizeof(struct sched_job));
+
+	if(!s) {
+		EMLOG("No more memory!");
+		return -1;
+	}
+
+	INIT_LIST_HEAD(&s->next);
+	s->args = msg;
+	s->elapse = 1;
+	s->type = JOB_TYPE_SEND;
+	s->reschedule = 0;
+
+	status = sched_add_job(s, &a->sched);
+
+	/* Some error occurs?*/
+	if(status) {
+		free(s);
+	}
+
+	return status;
+}
+
+int em_has_trigger(int enb_id, int trigger_id) {
+	struct agent * a = 0;
+
+	int found = 0;
+	int status = 0;
+
+/****** LOCK ******************************************************************/
+	pthread_spin_lock(&em_agents_lock);
+	list_for_each_entry(a, &em_agents, next) {
+		if(a->b_id == enb_id) {
+			status = tr_has_trigger(&a->trig, trigger_id);
+			break;
+		}
+	}
+	pthread_spin_unlock(&em_agents_lock);
+/****** UNLOCK ****************************************************************/
+
+	return status;
+}
 
 int em_init(void) {
 	if(!initialized) {
@@ -133,7 +184,7 @@ int em_release_agent(struct agent * a) {
 	free(a);
 }
 
-int em_terminate_agent(int b_id) {
+int em_send(int enb_id, EmageMsg * msg) {
 	struct agent * a = 0;
 
 	int found = 0;
@@ -141,10 +192,33 @@ int em_terminate_agent(int b_id) {
 
 /****** LOCK ******************************************************************/
 	pthread_spin_lock(&em_agents_lock);
-	list_for_each_entry(a, &em_agents, listh) {
+	list_for_each_entry(a, &em_agents, next) {
+		if(a->b_id == enb_id) {
+			status = add_send_job(a, msg);
+
+			break;
+		}
+	}
+	pthread_spin_unlock(&em_agents_lock);
+/****** UNLOCK ****************************************************************/
+
+	return status;
+}
+
+int em_terminate_agent(int b_id) {
+	struct agent * a = 0;
+	struct agent * b = 0;
+
+	int found = 0;
+	int status = 0;
+
+/****** LOCK ******************************************************************/
+	pthread_spin_lock(&em_agents_lock);
+	list_for_each_entry_safe(a, b, &em_agents, next) {
 		if(a->b_id == b_id) {
-			list_del(&a->listh);
+			list_del(&a->next);
 			found = 1;
+			break;
 		}
 	}
 	pthread_spin_unlock(&em_agents_lock);
@@ -154,6 +228,12 @@ int em_terminate_agent(int b_id) {
 		if(a->ops->release) {
 			status = a->ops->release();
 		}
+
+		tr_flush(&a->trig);
+		pthread_spin_destroy(&a->trig.lock);
+
+		net_stop(&a->net);
+		sched_stop(&a->sched);
 
 		EMDBG("Releasing agent for base station %d", a->b_id);
 		em_release_agent(a);
@@ -188,7 +268,7 @@ int em_start(struct em_agent_ops * ops, int b_id) {
 /****** LOCK ******************************************************************/
 	pthread_spin_lock(&em_agents_lock);
 	/* Find for an already present agent. */
-	list_for_each_entry(a, &em_agents, listh) {
+	list_for_each_entry(a, &em_agents, next) {
 		if(a->b_id == b_id) {
 			running = 1;
 			break;
@@ -201,11 +281,11 @@ int em_start(struct em_agent_ops * ops, int b_id) {
 
 		if(a) {
 			memset(a, 0, sizeof(struct agent));
-			INIT_LIST_HEAD(&a->listh);
+			INIT_LIST_HEAD(&a->next);
 			a->b_id = b_id;
 
 			/* Quickly add it to the list. */
-			list_add(&a->listh, &em_agents);
+			list_add(&a->next, &em_agents);
 		} else {
 			nm = 1;
 		}
@@ -238,6 +318,10 @@ int em_start(struct em_agent_ops * ops, int b_id) {
 	a->net.port = em_conf.ctrl_port;
 	a->ops = ops;
 
+	/* Initialize locking for triggering mechanism. */
+	pthread_spin_init(&a->trig.lock, 0);
+	INIT_LIST_HEAD(&a->trig.ts);
+
 	if (a->ops->init) {
 		status = a->ops->init();
 
@@ -248,7 +332,7 @@ int em_start(struct em_agent_ops * ops, int b_id) {
 
 /****** LOCK ******************************************************************/
 			pthread_spin_lock(&em_agents_lock);
-			list_del(&a->listh);
+			list_del(&a->next);
 			pthread_spin_unlock(&em_agents_lock);
 /****** UNLOCK ****************************************************************/
 
@@ -265,7 +349,7 @@ int em_start(struct em_agent_ops * ops, int b_id) {
 	if(sched_start(&a->sched)) {
 /****** LOCK ******************************************************************/
 		pthread_spin_lock(&em_agents_lock);
-		list_del(&a->listh);
+		list_del(&a->next);
 		pthread_spin_unlock(&em_agents_lock);
 /****** UNLOCK ****************************************************************/
 
@@ -282,7 +366,7 @@ int em_start(struct em_agent_ops * ops, int b_id) {
 	if(net_start(&a->net)) {
 /****** LOCK ******************************************************************/
 		pthread_spin_lock(&em_agents_lock);
-		list_del(&a->listh);
+		list_del(&a->next);
 		pthread_spin_unlock(&em_agents_lock);
 /****** UNLOCK ****************************************************************/
 
@@ -297,11 +381,32 @@ int em_start(struct em_agent_ops * ops, int b_id) {
 }
 
 int em_stop(void) {
-	/* Wait for it to finish.
-	pthread_join(em_listener.thread, NULL);
-	/*pthread_join(em_listen_thread, NULL);*/
+	struct agent * a = 0;
 
-	EMLOG("Agent has been terminated!");
+	while(!list_empty(&em_agents)) {
+/****** LOCK ******************************************************************/
+		pthread_spin_lock(&em_agents_lock);
+		a = list_first_entry(&em_agents, struct agent, next);
+		list_del(&a->next);
+		pthread_spin_unlock(&em_agents_lock);
+/****** UNLOCK ****************************************************************/
+
+		if(a->ops->release) {
+			a->ops->release();
+		}
+
+		tr_flush(&a->trig);
+		pthread_spin_destroy(&a->trig.lock);
+
+		net_stop(&a->net);
+		sched_stop(&a->sched);
+
+		EMDBG("Releasing agent for base station %d", a->b_id);
+		em_release_agent(a);
+	}
+
+	EMLOG("Shut down...");
 
 	return 0;
 }
+

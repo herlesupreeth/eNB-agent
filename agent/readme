@@ -1,11 +1,30 @@
-
-	EmPOWER Agent
+	EmPOWER Agent core
 
 This is the standalone logic for the agent. It completely abstracts over the
-technology used and provides a communication interface for the controller. See 
-the documentation folder for more info.
+technology used and provides a communication interface for the controller.
 
-BUILD
 
-Invoke the make to build the library. Source files present in this directory can
-be directly accessed or used as a static library to include in your application.
+
+  BUILD
+  
+This software can be compiled in several way, depending on the necessity. It can
+be directly included in your project (by adding the source files to your make), 
+as a static library, which can be later added to your project, or as a dynamic
+library (the project standard make action).
+
+Usually you can desire to have it included in your project (direct inclusion or
+static library) when you want to build a standalone-like application, which does
+not need installation.
+
+In any case, for this two case you need to have your own make, since the default
+one just support dynamic library compilation. I already tried those approach and
+they generate no problems with the agent core elements.
+
+  
+  
+  DEBUGGING
+
+In order to debug the core you can compile the library using the command
+"make debug". This will includes debugging messages to the core procedures, but
+will make everything really verbose.
+
