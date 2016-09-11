@@ -282,6 +282,18 @@ message ue_capabilities {
 	repeated uint32 band = 1;
 	// 3GPP release implementation in UE.
 	optional uint32 release_3gpp = 2;
+	// Inter frequency neighbor cell Signalling Information Acquisition.
+	optional bool interFreq_SI_acq = 3;
+	// Intra frequency neighbor cell Signalling Information Acquisition.
+	optional bool intraFreq_SI_acq = 4;
+	// Support for A4 and A5 EUTRA RRC measurement events.
+	optional bool A5_A4_events = 5;
+	// Support for Inter frequency measurements.
+	optional bool interFreq_meas = 6;
+	// Intra frequency reference signal periodic measurements support.
+	optional bool intraFreq_ref_per_meas = 7;
+	// Inter frequency reference signal periodic measurements support.
+	optional bool interFreq_ref_per_meas = 8;
 }
 
 //
@@ -432,7 +444,7 @@ message rep_conf_a5 {
 message rep_conf_EUTRA {
 	oneof conf_EUTRA {
 		// Periodical report configuration.
-		rep_conf_per peridical = 1;
+		rep_conf_per periodical = 1;
 		// A1 event report configuration.
 		rep_conf_a1 a1 = 2;
 		// A2 event report configuration.
