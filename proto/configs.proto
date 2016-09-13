@@ -248,6 +248,16 @@ enum ue_rxtx_time_difference {
 }
 
 //
+// Denotes the type of Duplexing mechanism used.
+//
+enum DD_mode {
+	// Frequency Division Duplexing mode.
+	DDM_FDD = 0;
+	// Time Division Duplexing mode.
+	DDM_TDD = 1;
+}
+
+//
 // Status of the request for a particular configuration. Success or failure.
 //
 enum conf_req_status {
@@ -528,6 +538,10 @@ message ue_rrc_meas_conf_repl {
 	repeated report_config r_conf = 8;
 	// Measurement identifers.
 	repeated meas_identifier meas_id = 9;
+	// Operating frequency (MHz) of the UE's primary serving cell.
+	optional float freq = 10;
+	// UE's primary serving cell FDD or TDD.
+	optional DD_mode pcell_DD = 11;
 }
 
 //
@@ -547,7 +561,8 @@ message ue_rrc_meas_conf {
 // Message definition for request of identifiers of all the UEs registered.
 //
 message ues_id_req {
-
+	// Dummy variable (Used in Python Protobuf)
+	optional int32 dummy = 1;
 }
 
 //
