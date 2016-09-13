@@ -92,24 +92,24 @@ int add_send_job(struct agent * a, EmageMsg * msg) {
 	return status;
 }
 
-int em_has_trigger(int enb_id, int trigger_id) {
+int em_has_trigger(int enb_id, int tid, int ttype) {
 	struct agent * a = 0;
 
 	int found = 0;
-	int status = 0;
+	struct trigger * t = 0;
 
 /****** LOCK ******************************************************************/
 	pthread_spin_lock(&em_agents_lock);
 	list_for_each_entry(a, &em_agents, next) {
 		if(a->b_id == enb_id) {
-			status = tr_has_trigger(&a->trig, trigger_id);
+			t = tr_has_trigger(&a->trig, tid, ttype);
 			break;
 		}
 	}
 	pthread_spin_unlock(&em_agents_lock);
 /****** UNLOCK ****************************************************************/
 
-	return status;
+	return t ? 1 : 0;
 }
 
 int em_init(void) {
@@ -409,4 +409,3 @@ int em_stop(void) {
 
 	return 0;
 }
-

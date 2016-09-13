@@ -1,3 +1,4 @@
+
 	EmPOWER Agent core
 
 This is the standalone logic for the agent. It completely abstracts over the
@@ -27,4 +28,3 @@ they generate no problems with the agent core elements.
 In order to debug the core you can compile the library using the command
 "make debug". This will includes debugging messages to the core procedures, but
 will make everything really verbose.
-

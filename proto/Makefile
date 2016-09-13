@@ -51,4 +51,4 @@ install:
 uninstall:
 	rm $(INSTDIR)/libemproto.so
 	rm -r $(INCLDIR)/pb
-
+	

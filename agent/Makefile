@@ -63,4 +63,3 @@ install:
 uninstall:
 	rm $(INSTDIR)/libemagent.so
 	rm -r $(INCLDIR)
-

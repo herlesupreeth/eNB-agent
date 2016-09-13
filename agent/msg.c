@@ -94,4 +94,3 @@ int msg_parse_hello(int seq, int bid, char ** buf, int * size) {
 
 	return msg_parse(buf, size, &msg);
 }
-

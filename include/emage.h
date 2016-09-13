@@ -62,11 +62,12 @@ struct em_agent_ops {
 
 	/* Informs the stack that a log for UE activity has been required by the
 	 * controller. The wrap decide what kind of activity needs to be logged,
-	 * now.
+	 * now. The id given has to be used to check for its existence later.
 	 *
 	 * Returns 0 on success, a negative error code otherwise.
 	 */
-	int (* UEs_ID_report) (EmageMsg * request, EmageMsg ** reply);
+	int (* UEs_ID_report) (
+		EmageMsg * request, EmageMsg ** reply, unsigned int trigger_id);
 
 	/*
 	 * RRC stuff.
@@ -77,14 +78,16 @@ struct em_agent_ops {
 	 *
 	 * Returns 0 on success, a negative error code otherwise.
 	 */
-	int (* RRC_measurements) (EmageMsg * request, EmageMsg ** reply);
+	int (* RRC_measurements) (
+		EmageMsg * request, EmageMsg ** reply, unsigned int trigger_id);
 
 	/* Informs the stack that a RRC measurement configuration request has
 	 * been issued by the controller for this base station.
 	 *
 	 * Returns 0 on success, a negative error code otherwise.
 	 */
-	int (* RRC_meas_conf_report) (EmageMsg * request, EmageMsg ** reply);
+	int (* RRC_meas_conf) (
+		EmageMsg * request, EmageMsg ** reply, unsigned int trigger_id);
 };
 
 /* Peek the triggers of the given agent and check if a trigger is enabled or
@@ -93,7 +96,7 @@ struct em_agent_ops {
  *
  * Returns 1 if the trigger is enabled, 0 otherwise.
  */
-int em_has_trigger(int enb_id, int trigger_id);
+int em_has_trigger(int enb_id, int tid, int ttype);
 
 /* Send a message to the connected controller, if any controller is attached.
  * This operations is only possible if the agent for that particular id has
@@ -129,4 +132,3 @@ int em_stop(void);
 int em_terminate_agent(int b_id);
 
 #endif
-

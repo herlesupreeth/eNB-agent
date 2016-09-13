@@ -23,24 +23,27 @@
 
 #include "triggers.h"
 
-int tr_add(struct tr_context * tc, int id, int type) {
-	struct trigger * t = 0;
+struct trigger * tr_add(
+	struct tr_context * tc, int id, int type, EmageMsg * req) {
 
-	if(tr_has_trigger(tc, type)) {
+	struct trigger * t = tr_has_trigger(tc, id, type);
+
+	if(t) {
 		EMDBG("Trigger %d already exists", type);
-		return 0;
+		return t;
 	}
 
 	t = malloc(sizeof(struct trigger));
 
 	if(!t) {
 		EMLOG("Not enough memory for new trigger!");
-		return -1;
+		return 0;
 	}
 
 	INIT_LIST_HEAD(&t->next);
 	t->id = id;
 	t->type = type;
+	t->req = req;
 
 /****** LOCK ******************************************************************/
 	pthread_spin_lock(&tc->lock);
@@ -50,17 +53,17 @@ int tr_add(struct tr_context * tc, int id, int type) {
 
 	EMDBG("New trigger enabled, id=%d, type=%d", id, type);
 
-	return 0;
+	return t;
 }
 
-int tr_has_trigger(struct tr_context * tc, int id) {
+struct trigger * tr_has_trigger(struct tr_context * tc, int id, int type) {
 	struct trigger * t = 0;
 	int found = 0;
 
 /****** LOCK ******************************************************************/
 	pthread_spin_lock(&tc->lock);
 	list_for_each_entry(t, &tc->ts, next) {
-		if(t->type == id) {
+		if(t->type == type && t->id == id) {
 			found = 1;
 			break;
 		}
@@ -68,7 +71,11 @@ int tr_has_trigger(struct tr_context * tc, int id) {
 	pthread_spin_unlock(&tc->lock);
 /****** UNLOCK ****************************************************************/
 
-	return found;
+	if(!found) {
+		return 0;
+	}
+
+	return t;
 }
 
 int tr_flush(struct tr_context * tc) {
@@ -100,6 +107,11 @@ int tr_rem(struct tr_context * tc, int id) {
 			EMDBG("Removing trigger %d", t->id);
 
 			list_del(&t->next);
+
+			if(t->req) {
+				emage_msg__free_unpacked(t->req, 0);
+			}
+
 			free(t);
 		}
 	}
@@ -108,4 +120,3 @@ int tr_rem(struct tr_context * tc, int id) {
 
 	return 0;
 }
-

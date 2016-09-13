@@ -48,4 +48,3 @@ struct agent {
 };
 
 #endif /* __EMAGE_AGENT_H */
-

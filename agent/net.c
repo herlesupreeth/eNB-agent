@@ -220,148 +220,13 @@ int net_send(struct net_context * context, char * buf, unsigned int size) {
 	return send(context->sockfd, buf, size, MSG_DONTWAIT | MSG_NOSIGNAL);
 }
 
-#if 0
-int net_enbcr(struct net_context * net, EmageMsg * msg) {
-	struct agent * a = container_of(net, struct agent, net);
-	EnbConfigRequest * cr = msg->mconfs->enb_conf_req;
-	struct sched_job * job = malloc(sizeof(struct sched_job));
-
-	if (!job) {
-		EMLOG("Not enough memory!");
-		goto err_free;
-	}
-
-	memset(job, 0, sizeof(struct sched_job));
-	INIT_LIST_HEAD(&job->next);
-	job->type = JOB_TYPE_ENB_CONFIG_REQ;
-	job->args = msg;
-	job->id = msg->head->t_id;
-	job->elapse = 0;
-
-	sched_add_job(job, &a->sched);
-
-	return 0;
-
-err_free:
-	/* Free the memory and return a failure. */
-	emage_msg__free_unpacked(msg, 0);
-	return -1;
-}
-#endif
-
-#if 0
-int net_uecr(struct net_context * net, EmageMsg * msg) {
-	struct agent * a = container_of(net, struct agent, net);
-	EnbConfigRequest * cr = msg->mconfs->enb_conf_req;
-	struct sched_job * job = malloc(sizeof(struct sched_job));
-
-	if (!job) {
-		EMLOG("Not enough memory!");
-		goto err_free;
-	}
-
-	memset(job, 0, sizeof(struct sched_job));
-	INIT_LIST_HEAD(&job->next);
-	job->type = JOB_TYPE_UE_CONFIG_REQ;
-	job->args = msg;
-	job->id = msg->head->t_id;
-	job->elapse = 0;
-
-	sched_add_job(job, &a->sched);
-
-	return 0;
-
-err_free:
-	/* Free the memory and return a failure. */
-	emage_msg__free_unpacked(msg, 0);
-	return -1;
-}
-#endif
-
-#if 0
-int net_L2sr(struct net_context * net, EmageMsg * msg) {
-	struct agent * a = container_of(net, struct agent, net);
-	L2StatisticsRequest * l2r = msg->mstats->l2_stats_req;
-	struct sched_job * job = 0;
-
-	/* Remove an already schedued job. */
-	if (l2r->report_freq == REPORTING_FREQUENCY__REPF_OFF) {
-		sched_remove_job(msg->head->t_id, &a->sched);
-
-		/* Everything ends here; message is freed... */
-		emage_msg__free_unpacked(msg, 0);
-		return 0;
-	}
-
-	job = malloc(sizeof(struct sched_job));
-
-	if(!job) {
-		EMLOG("Not enough memory!");
-		goto err_free;
-	}
-
-	memset(job, 0, sizeof(struct sched_job));
-	INIT_LIST_HEAD(&job->next);
-	job->type = JOB_TYPE_L2_STAT_REQ;
-	job->args = msg;
-	job->id = msg->head->t_id;
-	job->elapse = l2r->subframe;
-
-	/* Do it more than once? */
-	if (l2r->report_freq == REPORTING_FREQUENCY__REPF_PERIODICAL) {
-		job->reschedule = 1;
-	}
-
-	sched_add_job(job, &a->sched);
-
-	return 0;
-
-err_free:
-	/* Free the memory and return a failure. */
-	emage_msg__free_unpacked(msg, 0);
-	return -1;
-}
-#endif
-
-#if 0
-/* Process an incoming configuration request message. */
-int net_process_config_req(struct net_context * net, EmageMsg * msg) {
-
-	Configs * c = msg->mconfs;
-
-	if (c->type == CONFIG_MSG_TYPE__ENB_CONF_REQUEST) {
-		EMDBG("eNB configuration request detected");
-		return net_enbcr(net, msg);
-	}
-	else if (c->type == CONFIG_MSG_TYPE__UE_CONF_REQUEST) {
-		EMDBG("eNB configuration request detected");
-		return net_uecr(net, msg);
-	}
-
-	return 0;
-}
-#endif
-
-#if 0
-/* Process an incoming statistic request message. */
-int net_process_stats_req(struct net_context * net, EmageMsg * msg) {
-	Statistics * s = msg->mstats;
-
-	if(s->type == STATS_MSG_TYPE__L2_STATISTICS_REQUEST) {
-		EMDBG("L2 statistic request detected");
-		return net_L2sr(net, msg);
-	}
-
-	return 0;
-}
-#endif
-
 int net_sched_job(
 	struct agent * a,
+	unsigned int id,
 	int type,
 	int interval,
 	int res,
-	EmageMsg * msg) {
+	void * args) {
 
 	struct sched_job * job = malloc(sizeof(struct sched_job));
 
@@ -374,17 +239,18 @@ int net_sched_job(
 
 	INIT_LIST_HEAD(&job->next);
 	job->type = type;
-	job->args = msg;
-	job->id = msg->head->t_id;
+	job->args = args;
+	job->id = id;
 	job->elapse = interval;
 	job->reschedule = res;
 
 	sched_add_job(job, &a->sched);
 }
 
+/* Schedule an UE ids trigger job. */
 int net_te_usid(struct net_context * net, EmageMsg * msg) {
 	struct agent * a = container_of(net, struct agent, net);
-	int status = 0;
+	struct trigger * t = 0;
 
 	if(!msg->te->mues_id) {
 		EMDBG("Malformed UEs trigger message!\n");
@@ -398,22 +264,109 @@ int net_te_usid(struct net_context * net, EmageMsg * msg) {
 		}
 
 		if(msg->te->action == EVENT_ACTION__EA_DEL) {
-			status = tr_rem(&a->trig, msg->head->t_id);
+			return tr_rem(&a->trig, msg->head->t_id);
 		} else {
-			status = tr_add(
+			t = tr_add(
 				&a->trig,
 				msg->head->t_id,
-				EM_UEs_ID_REPORT_TRIGGER);
+				EM_UEs_ID_REPORT_TRIGGER,
+				msg);
+
+			if(!t) {
+				return -1;
+			}
 
 			net_sched_job(
 				a,
+				msg->head->t_id,
 				JOB_TYPE_UEs_LOG_TRIGGER,
-				1, 0,
-				msg);
+				1,
+				0,
+				(void *)t);
 		}
 	}
 
-	return status;
+	return 0;
+}
+
+/* Schedule an RRC measurement trigger job. */
+int net_te_rrc_meas(struct net_context * net, EmageMsg * msg) {
+	struct agent * a = container_of(net, struct agent, net);
+	struct trigger * t = 0;
+
+	if(!msg->te->mrrc_meas) {
+		EMDBG("Malformed RRC measurement trigger message!\n");
+		return -1;
+	}
+
+	if(!msg->te->has_action) {
+		EMDBG("Wrong UEs_ID request format: no action.");
+		return -1;
+	}
+
+	if(msg->te->action == EVENT_ACTION__EA_DEL) {
+		return tr_rem(&a->trig, msg->head->t_id);
+	} else {
+		t = tr_add(
+			&a->trig,
+			msg->head->t_id,
+			EM_RRC_MEAS_TRIGGER,
+			msg);
+
+		if(!t) {
+			return -1;
+		}
+
+		net_sched_job(
+			a,
+			msg->head->t_id,
+			JOB_TYPE_RRC_MEAS_TRIGGER,
+			1,
+			0,
+			(void *)t);
+	}
+
+	return 0;
+}
+
+/* Schedule an RRC measurement conficugation trigger job. */
+int net_te_rrc_mcon(struct net_context * net, EmageMsg * msg) {
+	struct agent * a = container_of(net, struct agent, net);
+	struct trigger * t = 0;
+
+	if(!msg->te->mrrc_meas) {
+		EMDBG("Malformed RRC measurement trigger message!\n");
+		return -1;
+	}
+
+	if(!msg->te->has_action) {
+		EMDBG("Wrong UEs_ID request format: no action.");
+		return -1;
+	}
+
+	if(msg->te->action == EVENT_ACTION__EA_DEL) {
+		return tr_rem(&a->trig, msg->head->t_id);
+	} else {
+		t = tr_add(
+			&a->trig,
+			msg->head->t_id,
+			EM_RRC_MEAS_CONF_TRIGGER,
+			msg);
+
+		if(!t) {
+			return -1;
+		}
+
+		net_sched_job(
+			a,
+			msg->head->t_id,
+			JOB_TYPE_RRC_MCON_TRIGGER,
+			1,
+			0,
+			(void *)t);
+	}
+
+	return 0;
 }
 
 int net_process_sched_event(struct net_context * net, EmageMsg * msg) {
@@ -451,6 +404,10 @@ int net_process_trigger_event(struct net_context * net, EmageMsg * msg) {
 	switch(te->events_case) {
 	case TRIGGER_EVENT__EVENTS_M_UES_ID:
 		return net_te_usid(net, msg);
+	case TRIGGER_EVENT__EVENTS_M_RRC_MEAS:
+		return net_te_rrc_meas(net, msg);
+	case TRIGGER_EVENT__EVENTS_M_UE_RRC_MEAS_CONF:
+		return net_te_rrc_mcon(net, msg);
 	default:
 		EMDBG("Unknown trigger event, type=%d", te->events_case);
 		break;
@@ -526,7 +483,7 @@ void * net_loop(void * args) {
 					"msg=%d, recv=%d", mlen, bread);
 
 				/* Ok, this is serious, since we can loose the
-				 * alignment of the 4 firsts bytes which
+				 * alignment of the 4 firsts bytes which 
 				 * contains the message size.
 				 *
 				 * Cloasing the socket here cause the Hello to
@@ -588,4 +545,3 @@ int net_stop(struct net_context * net) {
 
 	return 0;
 }
-

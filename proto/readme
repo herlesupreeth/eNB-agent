@@ -12,4 +12,3 @@ Same rules that are valid for the agent applies here: the project is compiled by
 default as a shared library, that must be installed in your system. If you 
 desire to build a standalone application, just include the straight source files
 in your project, switch to static library compilation.
-

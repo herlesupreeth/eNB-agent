@@ -119,13 +119,13 @@ int sched_perform_hello(struct agent * a, struct sched_job * job) {
 	return JOB_CONSUMED;
 }
 
-int sched_perform_UEs_report(struct agent * a, struct sched_job * job) {
-	EmageMsg * msg = (EmageMsg *)job->args;
+int sched_perform_RRC_mcon(struct agent * a, struct sched_job * job) {
+	struct trigger * t = (struct trigger*)job->args;
 	EmageMsg * reply = 0;
 
 	/* Inform the stack about the activation of the logging mechanism. */
-	if(a->ops->UEs_ID_report) {
-		a->ops->UEs_ID_report(msg, &reply);
+	if(a->ops->RRC_meas_conf) {
+		a->ops->RRC_meas_conf(t->req, &reply, t->id);
 	}
 
 	/* Something to say at the controller? */
@@ -137,142 +137,41 @@ int sched_perform_UEs_report(struct agent * a, struct sched_job * job) {
 	return JOB_CONSUMED;
 }
 
-#if 0
-/* Configuration of eNB. */
-int sched_perform_enbr(struct agent * a, struct sched_job * job) {
-	char * buf = 0;
-	int blen = 0;
+int sched_perform_RRC_meas(struct agent * a, struct sched_job * job) {
+	struct trigger * t = (struct trigger*)job->args;
+	EmageMsg * reply = 0;
 
-	EmageMsg * msg = (EmageMsg *)job->args;
-	EmageMsg * rpl = 0;
-
-	if (a->ops->eNB_config_reply) {
-		if (a->ops->eNB_config_reply(msg, &rpl)) {
-			EMLOG("Technology eNB configuration reply failed");
-			return JOB_CONSUMED;
-		}
-
-		if (!rpl) {
-			EMLOG("Reply message is 0");
-			return JOB_CONSUMED;
-		}
-
-		rpl->head->seq = net_next_seq(&a->net);
-		rpl->head->t_id = job->id;
-
-		if (msg_parse(&buf, &blen, rpl)) {
-			emage_msg__free_unpacked(rpl, 0);
-			return JOB_CONSUMED;
-		}
-
-		if (net_send(&a->net, buf, blen) < 0) {
-			EMDBG("Sending eNB configuration reply failed!");
-
-			emage_msg__free_unpacked(rpl, 0);
-			free(buf);
-			return JOB_NET_ERROR;
-		}
-
-		/* Dropping unused memory*/
-		emage_msg__free_unpacked(rpl, 0);
-		free(buf);
+	/* Inform the stack about the activation of the logging mechanism. */
+	if(a->ops->RRC_measurements) {
+		a->ops->RRC_measurements(t->req, &reply, t->id);
 	}
 
-	EMDBG("eNB configuration reply message sent.");
+	/* Something to say at the controller? */
+	if(reply) {
+		sched_send_msg(a, reply);
+		emage_msg__free_unpacked(reply, 0);
+	}
 
 	return JOB_CONSUMED;
 }
 
-/* Configuration of UE. */
-int sched_perform_uer(struct agent * a, struct sched_job * job) {
-	char * buf = 0;
-	int blen = 0;
+int sched_perform_UEs_report(struct agent * a, struct sched_job * job) {
+	struct trigger * t = (struct trigger*)job->args;
+	EmageMsg * reply = 0;
 
-	EmageMsg * msg = (EmageMsg *)job->args;
-	EmageMsg * rpl = 0;
-
-	if (a->ops->UE_config_reply) {
-		if (a->ops->UE_config_reply(msg, &rpl)) {
-			EMLOG("Technology UE configuration reply failed");
-			return JOB_CONSUMED;
-		}
-
-		if (!rpl) {
-			EMLOG("Reply message is 0");
-			return JOB_CONSUMED;
-		}
-
-		rpl->head->seq = net_next_seq(&a->net);
-		rpl->head->t_id = job->id;
-
-		if (msg_parse(&buf, &blen, rpl)) {
-			emage_msg__free_unpacked(rpl, 0);
-			return JOB_CONSUMED;
-		}
-
-		if (net_send(&a->net, buf, blen) < 0) {
-			EMDBG("Sending UE configuration reply failed!");
-
-			emage_msg__free_unpacked(rpl, 0);
-			free(buf);
-			return JOB_NET_ERROR;
-		}
-
-		/* Dropping unused memory*/
-		emage_msg__free_unpacked(rpl, 0);
-		free(buf);
+	/* Inform the stack about the activation of the logging mechanism. */
+	if(a->ops->UEs_ID_report) {
+		a->ops->UEs_ID_report(t->req, &reply, t->id);
 	}
 
-	EMDBG("UE configuration reply message sent.");
+	/* Something to say at the controller? */
+	if(reply) {
+		sched_send_msg(a, reply);
+		emage_msg__free_unpacked(reply, 0);
+	}
 
 	return JOB_CONSUMED;
 }
-
-/* Layer 2 statistic request.*/
-int sched_perform_L2sr(struct agent * a, struct sched_job * job) {
-	char * buf = 0;
-	int blen = 0;
-
-	EmageMsg * msg = (EmageMsg *)job->args;
-	EmageMsg * rpl = 0;
-
-	if(a->ops->L2_stat_reply) {
-		if(a->ops->L2_stat_reply(msg, &rpl)) {
-			EMLOG("Technology L2 reply failed");
-			return JOB_CONSUMED;
-		}
-
-		if(!rpl) {
-			EMLOG("Reply message is 0");
-			return JOB_CONSUMED;
-		}
-
-		rpl->head->seq  = net_next_seq(&a->net);
-		rpl->head->t_id = job->id;
-
-		if(msg_parse(&buf, &blen, rpl)) {
-			emage_msg__free_unpacked(rpl, 0);
-			return JOB_CONSUMED;
-		}
-
-		if(net_send(&a->net, buf, blen) < 0) {
-			EMDBG("Sending L2 failed!");
-
-			emage_msg__free_unpacked(rpl, 0);
-			free(buf);
-			return JOB_NET_ERROR;
-		}
-
-		/* Dropping unused memory*/
-		emage_msg__free_unpacked(rpl, 0);
-		free(buf);
-	}
-
-	EMDBG("L2 reply message sent.");
-
-	return JOB_CONSUMED;
-}
-#endif
 
 int sched_release_job(struct sched_job * job) {
 	EmageMsg * msg = 0;
@@ -341,17 +240,12 @@ int sched_perform_job(
 	case JOB_TYPE_UEs_LOG_TRIGGER:
 		status = sched_perform_UEs_report(a, job);
 		break;
-#if 0
-	case JOB_TYPE_L2_STAT_REQ:
-		status = sched_perform_L2sr(a, job);
+	case JOB_TYPE_RRC_MEAS_TRIGGER:
+		status = sched_perform_RRC_meas(a, job);
 		break;
-	case JOB_TYPE_ENB_CONFIG_REQ:
-		status = sched_perform_enbr(a, job);
+	case JOB_TYPE_RRC_MCON_TRIGGER:
+		status = sched_perform_RRC_mcon(a, job);
 		break;
-	case JOB_TYPE_UE_CONFIG_REQ:
-		status = sched_perform_uer(a, job);
-		break;
-#endif
 	default:
 		EMDBG("Unknown job cannot be performed, type=%d", job->type);
 	}
@@ -578,7 +472,7 @@ out:
 }
 
 int sched_start(struct sched_context * sched) {
-	sched->interval = 100;
+	sched->interval = 1;
 
 	INIT_LIST_HEAD(&sched->jobs);
 	INIT_LIST_HEAD(&sched->todo);
@@ -602,4 +496,3 @@ int sched_stop(struct sched_context * sched) {
 
 	return 0;
 }
-
