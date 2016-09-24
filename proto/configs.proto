@@ -92,21 +92,21 @@ enum Q_offset_range {
 	QOR_dB_2 = 13;
 	QOR_dB_1 = 14;
 	QOR_dB0 = 15;
-	QOR_dB1 = 16;
-	QOR_dB2 = 17;
-	QOR_dB3 = 18;
-	QOR_dB4 = 19;
-	QOR_dB5 = 20;
-	QOR_dB6 = 21;
-	QOR_dB8 = 22;
-	QOR_dB10 = 23;
-	QOR_dB12 = 24;
-	QOR_dB14 = 25;
-	QOR_dB16 = 26;
-	QOR_dB18 = 27;
-	QOR_dB20 = 28;
-	QOR_dB22 = 29;
-	QOR_dB24 = 30;
+	QOR_1dB = 16;
+	QOR_2dB = 17;
+	QOR_3dB = 18;
+	QOR_4dB = 19;
+	QOR_5dB = 20;
+	QOR_6dB = 21;
+	QOR_8dB = 22;
+	QOR_10dB = 23;
+	QOR_12dB = 24;
+	QOR_14dB = 25;
+	QOR_16dB = 26;
+	QOR_18dB = 27;
+	QOR_20dB = 28;
+	QOR_22dB = 29;
+	QOR_24dB = 30;
 }
 
 //
