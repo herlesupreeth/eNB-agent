@@ -179,11 +179,9 @@ int net_connect_to_controller(struct net_context * net) {
 		sizeof(struct sockaddr));
 
 	if(status < 0) {
-		EMLOG("Error while connecting to %s, error=%d",
+		EMDBG("Error while connecting to %s, error=%d",
 			net->addr,
 			status);
-		perror("connect");
-
 
 		return -1;
 	}
@@ -521,7 +519,7 @@ sleep:
 
 int net_start(struct net_context * net) {
 	/* 1 second interval by default. */
-	net->interval = 1000;
+	net->interval = 100;
 
 	pthread_spin_init(&net->lock, 0);
 
