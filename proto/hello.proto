@@ -30,7 +30,6 @@ message hello {
 		// Hello reply message.
 		hello_repl repl = 2;
 	}
-
 }
 
 //
