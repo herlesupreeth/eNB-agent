@@ -1,6 +1,8 @@
 
 	EmPOWER Agent core
 
+
+
 This is the standalone logic for the agent. It completely abstracts over the
 technology used and provides a communication interface for the controller.
 

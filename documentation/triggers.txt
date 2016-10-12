@@ -1,7 +1,34 @@
 
 	EmPOWER Agent triggers technology
 	
+
 	
-aaa
+Triggered events are the asynchronous mechanism which is offered by EMAge 
+technology. It allows to enable/disable feedback channels that are triggered in
+certain conditions, for example when an User Equipment connects to the base
+station.
+
+The following picture recaps the logic beheind the trigger mechanism:
+
+        LTE stack                           Agent
+        +------------------+             +------------------+
+        |                  |             |                  |
+        |  Turn features <--------------------- Enable      |
+        |       on         |             |      trigger     |
+        |                  |             |                  |
+        |                  |             |                  |
+        |                  |             |                  |
+        |  Turn features <-------------------------+        |
+        |       off        |             |         |        |
+        |                  |             |         |(n)     |
+       ------- Event -----------------------> Has trigger?  |
+        |                  |             |         |(y)     |
+        |     Prepare <----------------------------+        |
+        |     report       |             |                  |
+        |        |         |             |                  |
+        |        +-----------------------------> Send       |
+        |                  |             |                  |
+        +------------------+             +------------------+
+
 
 Kewin R.

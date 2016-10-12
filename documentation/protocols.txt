@@ -1,0 +1,34 @@
+
+	EmPOWER Agent protocols
+	
+
+
+The agent protocols are built around 3 major classification of the events that
+can occurs in the system, which are:
+  
+  - Single: This are synchronous events, requested by the controller and 
+    notified back immediately by the agents. This match the behavior of a 
+    request&reply message.
+    
+  - Scheduled: This are asynchronous events scheduled to be fired in the agents.
+    This allows to schedule in the future a certain event, or give to it a 
+    certain interval after that is always invoked(until the controller decide to
+    remove it).
+    
+  - Triggered: This are a mix of the previous two, since the trigger can be 
+    invoked at uncertain times. When a condition in the system happens, the 
+    agent must react and communicate such event to the controller. 
+    These are part of an on/off mechanism: when the trigger is activated you 
+    are nontified of it, and then you can activate the necessary mechanism to 
+    react to the event (base-station implementation specific). If such event 
+    happens but you don't find the trigger in the agent, this means that it has
+    been remove and you can disable the trigger notification.
+    
+All the messages can be one of this three main family, but usually some messages
+does not fix a particular family: for example the Hello message is just of type 
+"single", since it does not makes sense to have it Triggered or Scheduled.
+The agent will automatically schedule an hello every time it connects to the 
+controller, and will transmit a message as if the controller requested an Hello
+to the base station.
+
+Kewin R.

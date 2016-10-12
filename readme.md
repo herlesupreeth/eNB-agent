@@ -9,8 +9,8 @@ This software has been developed and tested for Linux.
 In order to successfully build EMAge you need:
 * Linux standard build suite (GCC, LD, AR, etc...).
 * Pthread library, necessary to handle multithreading.
-* Google protocol buffer (protobuf).
-* Protobuf-c, Google protocol buffer implementation for C.
+* Google protocol buffer (protobuf), version 3.0.0 or greater.
+* Google protocol buffer implementation for C (protobuf-c), version 1.2.1 or greater.
 
 ### Build instructions
 In order to use EMAge the necessary steps to do are:
