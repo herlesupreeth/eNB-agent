@@ -566,15 +566,35 @@ message ues_id_req {
 }
 
 //
+// Message definition for identifiers of active UE.
+//
+message active_ue {
+	// RNTI of UE.
+	required uint32 rnti = 1;
+	// IMSI of UE.
+	optional string imsi = 2;
+}
+
+//
+// Message definition for identifiers of inactive UE.
+//
+message inactive_ue {
+	// RNTI of UE.
+	required uint32 rnti = 1;
+	// IMSI of UE.
+	optional string imsi = 2;
+}
+
+//
 // Message definition for identifiers of all the UEs.
 //
 message ues_id_repl {
 	// Status of UEs ID request. Success or Failure.
 	required conf_req_status status = 1;
-	// Active UE RNTIs.
-	repeated uint32 active_rnti = 2;
-	// Inactive UE RNTIs.
-	repeated uint32 inactive_rnti = 3;
+	// Active UEs.
+	repeated active_ue active_ue_id = 2;
+	// Inactive UEs.
+	repeated inactive_ue inactive_ue_id = 3;
 }
 
 //

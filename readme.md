@@ -21,6 +21,8 @@ In order to use EMAge the necessary steps to do are:
 * Install the agent library in your system by invoking the `make install` command. This will install both the library and the necessary headers.
 * Include both the libraries when you are embedding the agent in your project.
 
+For instruction on how to cross-compile this project for other architecture, please refer to the cross-compile guide in the documentation folder. 
+
 ### Run the agent
 Take in account that, in order to run the agent, you must prepare a configuration file which has to be named `agent.conf` and placed under the `/etc/empower` directory. The syntax of such configuration file is, for the moment, outrageously simple, and just contains the necessary information to reach the controller. Such directory will be installed when the agent library is installed in your system, but probably you will need to change the default configuration (which points to the local machine).
 
