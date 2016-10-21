@@ -1,0 +1,79 @@
+
+	Cross compile EmPOWER Agent
+	
+	
+	
+Sometimes there is the necessity to cross-compile the software for a target 
+machines which is different from the classical x86 architecture. In this section
+you can find a step-by-step guide if you wish prepare the necessary 
+pre-requisites and the software itself for an target machine.
+
+The following terms will be used in the descriptions:    
+Host   = the machine where the compilation take place.
+Target = the machine where the compiled applications must run on.
+
+
+    ARM ARCHITECTURE
+To successfully cross-compile software for ARM, you will need the tools for ARM
+offered by your Linux distribution. The following notes are tested for Debian
+distributions, but it's not hard to adapt them to your current OS. 
+    
+Google Protocol Buffer (GPB)
+  We assume that the host machine already have a GPB built for local testing of 
+  the produced protocol files. This is necessary because the '--with-protoc'
+  needs a compatible compiler that executes the necessary tests.
+  The following commands will install GPB in a 'target_directory':
+
+      ./autogen.sh
+      ./configure --host=arm-linux             \
+          CC=arm-linux-gnueabihf-gcc           \
+          CXX=arm-linux-gnueabihf-g++          \
+          --with-protoc=/usr/local/bin/protoc  \
+          --prefix=<target_directory>
+      make
+      make install
+
+Protoc-c
+  Once you have GPB for ARM correctly compiled, proceed with the following 
+  commands to install protoc-c in a 'target_directory':
+
+      ./autogen.sh
+      LDFLAGS='-L<target_dir>/lib' ./configure --host=arm-linux    \
+          CC=arm-linux-gnueabihf-gcc                               \
+          CXX=arm-linux-gnueabihf-g++                              \
+          --prefix=<target_directory>
+      make
+      make install
+      
+Libemproto
+  To compile the protocol library you don't have to go too far away from the 
+  existing commands. The followings commands will do the job (invoke them from
+  the proto folder):
+  
+      arm-linux-gnueabihf-gcc                                        \
+          -I<target_directory>/include -I./pb -c -fpic ./pb/*.pb-c.c 
+      arm-linux-gnueabihf-gcc -shared                                \
+          -o <target_directory>/lib/libemproto.so *.pb-c.o
+      
+Libemage
+  Compiling the agent library is also really easy; the following commands will
+  usually do the job.
+  
+      arm-linux-gnueabihf-gcc -I../include -c -fpic \
+          ./msg.c                                   \
+          ./net.c                                   \
+          ./sched.c                                 \
+          ./triggers.c                              \
+          ./core.c
+      arm-linux-gnueabihf-gcc -shared               \
+           -o <target_directory>/lib/libemagent.so  \
+           *.o
+
+After all these simple steps, you will end having in "target_directory" all the
+tools necessary to run the cross-compiled agent on your ARM machine. Such 
+directory will have 3 subfolders, which are 'bin', 'include' and 'lib'. What is
+leaft is to move such binary to the target system and copy them under the right
+position to integrate everything with the running system.
+
+      
+Kewin R.
