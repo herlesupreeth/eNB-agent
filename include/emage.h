@@ -57,7 +57,7 @@ struct em_agent_ops {
 	int (* release) (void);
 
 	/*
-	 * ???
+	 * Generic stuff.
 	 */
 
 	/* Informs the stack that a log for UE activity has been required by the
