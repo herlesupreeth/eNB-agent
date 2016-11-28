@@ -56,6 +56,7 @@ message single_event {
 		hello mHello = 1;
 		ues_id mUEs_id = 2;
 		ue_rrc_meas_conf mUE_rrc_meas_conf = 3;
+		cell_stats mCell_stats = 4;
 	}
 }
 
@@ -71,6 +72,7 @@ message schedule_event {
 	oneof events {
 		ues_id mUEs_id = 3;
 		ue_rrc_meas_conf mUE_rrc_meas_conf = 4;
+		cell_stats mCell_stats = 5;
 	}
 }
 
@@ -86,6 +88,7 @@ message trigger_event {
 		ues_id mUEs_id = 3;
 		rrc_meas mRRC_meas = 4;
 		ue_rrc_meas_conf mUE_rrc_meas_conf = 5;
+		cell_stats mCell_stats = 6;
 	}
 }
 

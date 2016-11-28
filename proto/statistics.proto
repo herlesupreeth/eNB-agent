@@ -52,6 +52,14 @@ enum stats_req_status {
 	SREQS_FAILURE = 1;
 }
 
+//
+// Cells statistics types.
+//
+enum cell_stats_types {
+	// Physical Resource Block utilization in a cell.
+	CELLSTT_PRB_UTILIZATION = 1;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // 																			//
 ///////////////////////////////////////////////////////////////////////////////
@@ -175,5 +183,67 @@ message rrc_meas {
 		rrc_meas_req req = 1;
 		// Reply message with RRC measurements.
 		rrc_meas_repl repl = 2;
+	}
+}
+
+//
+// Message definition of request for Cell statistics.
+//
+message cell_stats_req {
+	// Cell identifier in an eNB.
+	required int32 cell_id = 1 [default = 0];
+	// Bitmap indicating the types of stats being requested.
+	required uint64 cell_stats_types = 2;
+}
+
+//
+// Message definition for PRB utilization in Downlink of a cell.
+//
+message dl_cell_prb_utilization {
+	// Number of PRBs in use in DL.
+	optional uint32 num_prbs = 1;
+	// Percentage of PRBs in use in DL.
+	optional uint32 perc_prbs = 2;
+}
+
+//
+// Message definition for PRB utilization in Uplink of a cell.
+//
+message ul_cell_prb_utilization {
+	// Number of PRBs in use in UL.
+	optional uint32 num_prbs = 1;
+	// Percentage of PRBs in use in UL.
+	optional uint32 perc_prbs = 2;
+}
+
+//
+// Message definition for reporting Physical Resource Block (PRB) utilization
+// in a cell for both downlink and uplink.
+//
+message cell_prb_utilization {
+	// PRB usage in Downlink (DL) of a cell.
+	optional dl_cell_prb_utilization dl_prb_utilz = 1;
+	// PRB usage in Uplink (UL) of a cell.
+	optional ul_cell_prb_utilization ul_prb_utilz = 2;
+}
+
+//
+// Message definition for Cell statistics reply.
+//
+message cell_stats_repl {
+	// Physical resource block
+	optional cell_prb_utilization prb_utilz = 1;
+}
+
+//
+// Cell statistics message.
+//
+message cell_stats {
+	// Types of cell statistics messages.
+	oneof cell_stats_m {
+		// Request message for Cell statistics.
+		cell_stats_req req = 1;
+		// Reply message with Cell statistics.
+		cell_stats_repl repl = 2;
 	}
 }
