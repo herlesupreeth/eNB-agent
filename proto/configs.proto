@@ -572,9 +572,9 @@ message active_ue {
 	// RNTI of UE.
 	required uint32 rnti = 1;
 	// IMSI of UE.
-	optional string imsi = 2;
+	optional uint64 imsi = 2;
 	// PLMN ID of CN to which UE is connected.
-	optional string plmn_id = 3;
+	optional uint32 plmn_id = 3;
 }
 
 //
@@ -584,9 +584,9 @@ message inactive_ue {
 	// RNTI of UE.
 	required uint32 rnti = 1;
 	// IMSI of UE.
-	optional string imsi = 2;
+	optional uint64 imsi = 2;
 	// PLMN ID of CN to which UE is attached.
-	optional string plmn_id = 3;
+	optional uint32 plmn_id = 3;
 }
 
 //
