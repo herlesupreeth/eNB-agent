@@ -23,6 +23,7 @@ syntax = "proto2";
 import "hello.proto";
 import "statistics.proto";
 import "configs.proto";
+import "commands.proto";
 
 //
 // Flag to determine whether add or delete the event.
@@ -57,6 +58,7 @@ message single_event {
 		ues_id mUEs_id = 2;
 		ue_rrc_meas_conf mUE_rrc_meas_conf = 3;
 		cell_stats mCell_stats = 4;
+		controller_commands mCtrl_cmds = 5;
 	}
 }
 
