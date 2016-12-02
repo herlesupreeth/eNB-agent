@@ -1,0 +1,92 @@
+/* Copyright (c) 2016 Supreeth herle <s.herle@create-net.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * This file carries the definition of the messages used to command the
+ * operations of eNB stack from the controller.
+ */
+
+syntax = "proto2";
+
+///////////////////////////////////////////////////////////////////////////////
+//								ENUMS										//
+///////////////////////////////////////////////////////////////////////////////
+
+//
+// Outcomes of command issued by controller.
+//
+enum ctrl_cmd_status {
+	// Successful outcome.
+	CTRLCMDST_SUCCESS = 0;
+	// Failure outcome.
+	CTRLCMDST_FAILURE = 1;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// 																			//
+///////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////
+//								MESSAGES									//
+///////////////////////////////////////////////////////////////////////////////
+
+//
+// Message definition for controller initiated UE handover.
+//
+message ctrl_handover {
+	// RNTI of the UE to be handed over.
+	required uint32 rnti = 1;
+	// Serving cell identifier.
+	optional int32 s_cell_id = 2;
+	// Serving eNB identifier.
+	optional uint32 s_eNB_id = 3;
+	// Target cell identifier.
+	optional int32 t_cell_id = 4;
+	// Target eNB identifier.
+	optional uint32 t_eNB_id = 5;
+}
+
+//
+// Message definition of request for controller commands.
+//
+message controller_commands_req {
+	// Controller commands.
+	oneof ctrl_cmd {
+		// Controller initiated handover of UE.
+		ctrl_handover ctrl_ho = 1;
+	}
+}
+
+//
+// Message definition of reply for controller commands.
+//
+message controller_commands_repl {
+	// Outcome of the command issued by controller.
+	required ctrl_cmd_status cmd_status = 1;
+}
+
+//
+// Controller commands message.
+//
+message controller_commands {
+	// Types of controller commands messages.
+	oneof controller_commands_m {
+		// Request message for controller commands.
+		controller_commands_req req = 1;
+		// Reply message for controller commands.
+		controller_commands_repl repl = 2;
+	}
+}
