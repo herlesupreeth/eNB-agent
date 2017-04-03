@@ -24,6 +24,7 @@ import "hello.proto";
 import "statistics.proto";
 import "configs.proto";
 import "commands.proto";
+import "ran_sharing.proto";
 
 //
 // Flag to determine whether add or delete the event.
@@ -59,6 +60,7 @@ message single_event {
 		ue_rrc_meas_conf mUE_rrc_meas_conf = 3;
 		cell_stats mCell_stats = 4;
 		controller_commands mCtrl_cmds = 5;
+		ran_sharing_ctrl mRAN_sharing_ctrl = 6;
 	}
 }
 
