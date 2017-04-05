@@ -55,7 +55,7 @@ int net_connected(struct net_context * net) {
 	struct agent * a = container_of(net, struct agent, net);
 	struct sched_job * h = 0;
 
-	EMLOG("Connected to controller %s:%d", net->addr, net->port);
+	EMDBG("Connected to controller %s:%d", net->addr, net->port);
 	net->status = EM_STATUS_CONNECTED;
 
 	h = malloc(sizeof(struct sched_job));
@@ -120,7 +120,7 @@ int net_nodelay_socket(int sockfd) {
 }
 
 int net_not_connected(struct net_context * net) {
-	EMLOG("No more connected with controller!");
+	EMDBG("No more connected with controller!");
 
 	close(net->sockfd);
 	net->sockfd = 0;
@@ -157,7 +157,7 @@ int net_connect_to_controller(struct net_context * net) {
 		net_nodelay_socket(net->sockfd);
 	}
 
-	EMLOG("Connecting to %s:%d...", net->addr, net->port);
+	EMDBG("Connecting to %s:%d...", net->addr, net->port);
 
 	ctrli = gethostbyname(net->addr);
 
@@ -181,7 +181,7 @@ int net_connect_to_controller(struct net_context * net) {
 		sizeof(struct sockaddr));
 
 	if(status < 0) {
-		EMLOG("Error while connecting to %s, error=%d",
+		EMDBG("Error while connecting to %s, error=%d",
 			net->addr,
 			status);
 
