@@ -23,7 +23,7 @@ syntax = "proto2";
 import "configs.proto";
 
 ///////////////////////////////////////////////////////////////////////////////
-//								ENUMS										//
+//                                 ENUMS                                     //
 ///////////////////////////////////////////////////////////////////////////////
 
 //
@@ -61,12 +61,12 @@ enum cell_stats_types {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// 																			//
+//                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//								MESSAGES									//
+//                                 MESSAGES                                  //
 ///////////////////////////////////////////////////////////////////////////////
 
 //
@@ -165,12 +165,14 @@ message rrc_meas_repl {
 	required stats_req_status status = 2;
 	// Measurement identifier.
 	optional int32 measId = 3;
+	// Carrier frequency of measurements.
+	optional uint32 freq = 4;
 	// Primary Cell Reference Signal Received Power (RSRP).
-	optional int32 PCell_rsrp = 4;
+	optional int32 PCell_rsrp = 5;
 	// Primary Cell Reference Signal Received Quality (RSRQ).
-	optional int32 PCell_rsrq = 5;
+	optional int32 PCell_rsrq = 6;
 	// Neighboring cells measurements performed by UE.
-	optional neigh_cells_measurements neigh_meas = 6;
+	optional neigh_cells_measurements neigh_meas = 7;
 }
 
 //
@@ -203,7 +205,7 @@ message dl_cell_prb_utilization {
 	// Number of PRBs in use in DL.
 	optional uint32 num_prbs = 1;
 	// Percentage of PRBs in use in DL.
-	optional uint32 perc_prbs = 2;
+	optional float perc_prbs = 2;
 }
 
 //
@@ -213,7 +215,7 @@ message ul_cell_prb_utilization {
 	// Number of PRBs in use in UL.
 	optional uint32 num_prbs = 1;
 	// Percentage of PRBs in use in UL.
-	optional uint32 perc_prbs = 2;
+	optional float perc_prbs = 2;
 }
 
 //

@@ -1,4 +1,4 @@
-/* Copyright (c) 2016 Kewin Rausch <kewin.rausch@create-net.org>
+/* Copyright (c) 2016 Kewin Rausch
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,8 @@ enum EM_TRIGGER_TYPE {
 	EM_RRC_MEAS_TRIGGER,
 	/* RRC measurements configuration trigger. */
 	EM_RRC_MEAS_CONF_TRIGGER,
+	/* Cell statistics trigger. */
+	EM_CELL_STATS_TRIGGER,
 };
 
 /* Defines the operations that can be customized depending on the technology
@@ -60,6 +62,15 @@ struct em_agent_ops {
 	 * Generic stuff.
 	 */
 
+	/* The controller informs this base station that an UE hand-over must be
+	 * done. The request message contains the information about the targets
+	 * of such operations.
+	 *
+	 * Returns 0 on success, a negative error code otherwise.
+	 */
+	int (* handover_request) (
+			EmageMsg * request, EmageMsg ** reply);
+
 	/* Informs the stack that a log for UE activity has been required by the
 	 * controller. The wrap decide what kind of activity needs to be logged,
 	 * now. The id given has to be used to check for its existence later.
@@ -87,6 +98,19 @@ struct em_agent_ops {
 	 * Returns 0 on success, a negative error code otherwise.
 	 */
 	int (* RRC_meas_conf) (
+		EmageMsg * request, EmageMsg ** reply, unsigned int trigger_id);
+
+	/*
+	 * Cell-specific stuff.
+	 */
+
+	/* Informs that the controller issued a request to report the actual
+	 * cell statistics. Negative trigger id identifies such operation as
+	 * once-only or agent scheduled.
+	 *
+	 * Returns 0 on success, a negative error code otherwise.
+	 */
+	int (* cell_statistics_report) (
 		EmageMsg * request, EmageMsg ** reply, unsigned int trigger_id);
 };
 

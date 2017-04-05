@@ -1,4 +1,4 @@
-/* Copyright (c) 2016 Kewin Rausch <kewin.rausch@create-net.org>
+/* Copyright (c) 2016 Kewin Rausch
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -53,7 +55,7 @@ int net_connected(struct net_context * net) {
 	struct agent * a = container_of(net, struct agent, net);
 	struct sched_job * h = 0;
 
-	EMDBG("Connected to controller %s:%d", net->addr, net->port);
+	EMLOG("Connected to controller %s:%d", net->addr, net->port);
 	net->status = EM_STATUS_CONNECTED;
 
 	h = malloc(sizeof(struct sched_job));
@@ -118,7 +120,7 @@ int net_nodelay_socket(int sockfd) {
 }
 
 int net_not_connected(struct net_context * net) {
-	EMDBG("No more connected with controller!");
+	EMLOG("No more connected with controller!");
 
 	close(net->sockfd);
 	net->sockfd = 0;
@@ -155,7 +157,7 @@ int net_connect_to_controller(struct net_context * net) {
 		net_nodelay_socket(net->sockfd);
 	}
 
-	EMDBG("Connecting to %s:%d...", net->addr, net->port);
+	EMLOG("Connecting to %s:%d...", net->addr, net->port);
 
 	ctrli = gethostbyname(net->addr);
 
@@ -179,7 +181,7 @@ int net_connect_to_controller(struct net_context * net) {
 		sizeof(struct sockaddr));
 
 	if(status < 0) {
-		EMDBG("Error while connecting to %s, error=%d",
+		EMLOG("Error while connecting to %s, error=%d",
 			net->addr,
 			status);
 
@@ -211,7 +213,7 @@ int net_send(struct net_context * context, char * buf, unsigned int size) {
 #endif
 
 	/* NOTE:
-	 * Since sending on a dead socket can cause a single to be issued to the
+	 * Since sending on a dead socket can cause a signal to be issued to the
 	 * application (SIGPIPE), we don't want that the host get disturbed by
 	 * this, and so we ask not to notify the error.
 	 */
@@ -243,6 +245,27 @@ int net_sched_job(
 	job->reschedule = res;
 
 	sched_add_job(job, &a->sched);
+
+	return 0;
+}
+
+/******************************************************************************
+ * Message specific procedures.                                               *
+ ******************************************************************************/
+
+int net_se_ctrl_cmd(struct net_context * net, EmageMsg * msg) {
+	struct agent * a = container_of(net, struct agent, net);
+
+	if(msg->se->mctrl_cmds->controller_commands_m_case !=
+			CONTROLLER_COMMANDS__CONTROLLER_COMMANDS_M_REQ) {
+
+		EMDBG("Invalid command reply received.");
+		return 0;
+
+	}
+
+	return net_sched_job(
+		a, msg->head->t_id, JOB_TYPE_CTRL_COMMAND, 1, 0, msg);
 }
 
 /* Schedule an UE ids trigger job. */
@@ -327,7 +350,7 @@ int net_te_rrc_meas(struct net_context * net, EmageMsg * msg) {
 	return 0;
 }
 
-/* Schedule an RRC measurement conficugation trigger job. */
+/* Schedule an RRC measurement configuration trigger job. */
 int net_te_rrc_mcon(struct net_context * net, EmageMsg * msg) {
 	struct agent * a = container_of(net, struct agent, net);
 	struct trigger * t = 0;
@@ -367,6 +390,45 @@ int net_te_rrc_mcon(struct net_context * net, EmageMsg * msg) {
 	return 0;
 }
 
+/* Schedule a cell statistics request trigger job. */
+int net_te_cell_stats(struct net_context * net, EmageMsg * msg) {
+	struct agent * a = container_of(net, struct agent, net);
+	struct trigger * t = 0;
+
+	if(!msg->te->mcell_stats) {
+		EMDBG("Malformed cell statistics trigger message!\n");
+		return -1;
+	}
+
+	if(msg->te->action == EVENT_ACTION__EA_DEL) {
+		return tr_rem(&a->trig, msg->head->t_id);
+	} else {
+		t = tr_add(
+			&a->trig,
+			msg->head->t_id,
+			EM_CELL_STATS_TRIGGER,
+			msg);
+
+		if(!t) {
+			return -1;
+		}
+
+		net_sched_job(
+			a,
+			msg->head->t_id,
+			JOB_TYPE_CELL_STATS_TRIGGER,
+			1,
+			0,
+			(void *)t);
+	}
+
+	return 0;
+}
+
+/******************************************************************************
+ * Top-level message handlers.                                                *
+ ******************************************************************************/
+
 int net_process_sched_event(struct net_context * net, EmageMsg * msg) {
 	ScheduleEvent * ce = msg->sche;
 
@@ -383,6 +445,9 @@ int net_process_single_event(struct net_context * net, EmageMsg * msg) {
 	SingleEvent * se = msg->se;
 
 	switch(se->events_case) {
+	case SINGLE_EVENT__EVENTS_M_CTRL_CMDS:
+		return net_se_ctrl_cmd(net, msg);
+		break;
 	default:
 		EMDBG("Unknown single event, type=%d", se->events_case);
 		break;
@@ -406,6 +471,8 @@ int net_process_trigger_event(struct net_context * net, EmageMsg * msg) {
 		return net_te_rrc_meas(net, msg);
 	case TRIGGER_EVENT__EVENTS_M_UE_RRC_MEAS_CONF:
 		return net_te_rrc_mcon(net, msg);
+	case TRIGGER_EVENT__EVENTS_M_CELL_STATS:
+		return net_te_cell_stats(net, msg);
 	default:
 		EMDBG("Unknown trigger event, type=%d", te->events_case);
 		break;
@@ -481,7 +548,7 @@ void * net_loop(void * args) {
 					"msg=%d, recv=%d", mlen, bread);
 
 				/* Ok, this is serious, since we can loose the
-				 * alignment of the 4 firsts bytes which 
+				 * alignment of the 4 firsts bytes which
 				 * contains the message size.
 				 *
 				 * Cloasing the socket here cause the Hello to

@@ -21,8 +21,18 @@
 syntax = "proto2";
 
 ///////////////////////////////////////////////////////////////////////////////
-//								ENUMS										//
+//                                 ENUMS                                     //
 ///////////////////////////////////////////////////////////////////////////////
+
+//
+// Define the possible causes which triggers an handover.
+//
+enum handover_cause {
+	// Time critical handover.
+	HC_TIME_CRITICAL = 0;
+	// Resource optimization handover.
+	HC_RESOURCE_OPTIMIZATION = 1;
+}
 
 //
 // Outcomes of command issued by controller.
@@ -35,12 +45,12 @@ enum ctrl_cmd_status {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// 																			//
+//                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//								MESSAGES									//
+//                                 MESSAGES                                  //
 ///////////////////////////////////////////////////////////////////////////////
 
 //
@@ -56,7 +66,9 @@ message ctrl_handover {
 	// Target cell identifier.
 	optional int32 t_cell_id = 4;
 	// Target eNB identifier.
-	optional uint32 t_eNB_id = 5;
+	required uint32 t_eNB_id = 5;
+	// Identify the cause of handover.
+	required handover_cause cause = 6;
 }
 
 //

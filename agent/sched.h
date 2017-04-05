@@ -1,4 +1,4 @@
-/* Copyright (c) 2016 Kewin Rausch <kewin.rausch@create-net.org>
+/* Copyright (c) 2016 Kewin Rausch
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,20 +20,24 @@
 #ifndef __EMAGE_SCHEDULER_H
 #define __EMAGE_SCHEDULER_H
 
-#define JOB_TYPE_INVALID			0
-#define JOB_TYPE_SEND				1
-#define JOB_TYPE_HELLO				2
-#define JOB_TYPE_L2_STAT_REQ			3
-#define JOB_TYPE_ENB_CONFIG_REQ			4
-#define JOB_TYPE_UE_CONFIG_REQ			5
-#define JOB_TYPE_UEs_LOG_TRIGGER		6
-#define JOB_TYPE_RRC_MEAS_TRIGGER		7
-#define JOB_TYPE_RRC_MCON_TRIGGER		8
-
 #include <time.h>
 #include <pthread.h>
 
 #include "emlist.h"
+
+/* Possible types of jobs to issue in the scheduler. */
+enum JOB_TYPES {
+	JOB_TYPE_INVALID = 0,
+	JOB_TYPE_SEND,
+	JOB_TYPE_HELLO,
+	JOB_TYPE_ENB_CONFIG_REQ,
+	JOB_TYPE_UE_CONFIG_REQ,
+	JOB_TYPE_UEs_LOG_TRIGGER,
+	JOB_TYPE_RRC_MEAS_TRIGGER,
+	JOB_TYPE_RRC_MCON_TRIGGER,
+	JOB_TYPE_CELL_STATS_TRIGGER,
+	JOB_TYPE_CTRL_COMMAND
+};
 
 /* Job for agent scheduler. */
 struct sched_job {

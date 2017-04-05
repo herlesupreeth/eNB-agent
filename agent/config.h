@@ -1,4 +1,4 @@
-/* Copyright (c) 2016 Kewin Rausch <kewin.rausch@create-net.org>
+/* Copyright (c) 2016 Kewin Rausch
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
 
 struct net_listener;
 
-/* This is ultimately the agent. */
+/* Configuration profile for an agent. */
 struct config_profile {
 	/* IPv4 address for the controller. */
 	char ctrl_ipv4_addr[16];

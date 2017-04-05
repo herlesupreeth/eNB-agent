@@ -1,4 +1,4 @@
-/* Copyright (c) 2016 Kewin Rausch <kewin.rausch@create-net.org>
+/* Copyright (c) 2016 Kewin Rausch
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,10 @@
 
 #include <stdlib.h>
 
+#include <pthread.h>
+
 #include <emlog.h>
+#include <emage/pb/main.pb-c.h>
 
 #include "triggers.h"
 

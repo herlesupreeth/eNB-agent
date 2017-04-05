@@ -1,9 +1,9 @@
 
 	EmPOWER Agent triggers technology
-	
 
-	
-Triggered events are the asynchronous mechanism which is offered by EMAge 
+
+
+Triggered events are the asynchronous mechanism which is offered by EMAge
 technology. It allows to enable/disable feedback channels that are triggered in
 certain conditions, for example when an User Equipment connects to the base
 station.

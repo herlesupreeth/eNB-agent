@@ -23,7 +23,7 @@ AGENTP=.
 
 #
 # You can personalize these variables if you want a sandboxed installation.
-# 
+#
 INSTDIR=/usr/lib
 INCLDIR=/usr/include/emage
 CONFDIR=/etc
@@ -38,13 +38,13 @@ all:
 		$(AGENTP)/sched.c 					\
 		$(AGENTP)/triggers.c 					\
 		$(AGENTP)/core.c
-	$(CC) -shared -o libemagent.so *.o  
-	
+	$(CC) -shared -o libemagent.so *.o
+
 clean:
-	rm -r ./*.o
-	rm -r ./*.a
-	rm -r ./*.so
-	
+	rm -f ./*.o
+	rm -f ./*.a
+	rm -f ./*.so
+
 debug:
 	$(CC) $(INCLUDES) -c -fpic -DEM_DEBUG				\
 		$(AGENTP)/msg.c 					\
@@ -52,14 +52,15 @@ debug:
 		$(AGENTP)/sched.c 					\
 		$(AGENTP)/triggers.c 					\
 		$(AGENTP)/core.c
-	$(CC) -shared -o libemagent.so *.o  
-	
+	$(CC) -shared -o libemagent.so *.o
+
 install:
 	cp ./libemagent.so $(INSTDIR)
-	mkdir -p $(INCLDIR) 
+	mkdir -p $(INCLDIR)
 	cp -r ../include/* $(INCLDIR)/
 	cp -r ../conf/empower $(CONFDIR)
-	
+
 uninstall:
 	rm $(INSTDIR)/libemagent.so
 	rm -r $(INCLDIR)
+	rm -r /etc/empower

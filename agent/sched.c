@@ -1,4 +1,4 @@
-/* Copyright (c) 2016 Kewin Rausch <kewin.rausch@create-net.org>
+/* Copyright (c) 2016 Kewin Rausch
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ int sched_send_msg(struct agent * a, EmageMsg * msg) {
 
 	int blen = 0;
 	int sent = 0;
+	int ret  = 0;
 
 	msg->head->seq  = net_next_seq(&a->net);
 
@@ -64,10 +65,11 @@ int sched_send_msg(struct agent * a, EmageMsg * msg) {
 	sent = net_send(&a->net, buf, blen);
 
 	if(sent < 0) {
-		return -1;
+		ret = -1;
 	}
 
-	return 0;
+	free(buf);
+	return ret;
 }
 
 /******************************************************************************
@@ -79,6 +81,7 @@ int sched_perform_send(struct agent * a, struct sched_job * job) {
 
 	int blen = 0;
 	int sent = 0;
+	int ret  = JOB_CONSUMED;
 
 	EmageMsg * msg = (EmageMsg *)job->args;
 
@@ -93,7 +96,50 @@ int sched_perform_send(struct agent * a, struct sched_job * job) {
 
 	if(sent < 0) {
 		EMDBG("Sending Hello failed!");
-		return JOB_NET_ERROR;
+		ret = JOB_NET_ERROR;
+	}
+
+	free(buf);
+	return ret;
+}
+
+/* This has to be used only in case of trigger events. */
+int sched_perform_cell_tstats(struct agent * a, struct sched_job * job) {
+	struct trigger * t = (struct trigger*)job->args;
+	EmageMsg * reply = 0;
+
+	if(a->ops->cell_statistics_report) {
+		a->ops->cell_statistics_report(t->req, &reply, t->id);
+	}
+
+	/* Something to say at the controller? */
+	if(reply) {
+		sched_send_msg(a, reply);
+		emage_msg__free_unpacked(reply, 0);
+	}
+
+	return JOB_CONSUMED;
+}
+
+int sched_perform_ctrl_cmd(struct agent * a, struct sched_job * job) {
+	EmageMsg * msg   = (EmageMsg *)job->args;
+	EmageMsg * reply = 0;
+
+	switch(msg->se->mctrl_cmds->req->ctrl_cmd_case) {
+	case CONTROLLER_COMMANDS_REQ__CTRL_CMD_CTRL_HO:
+		/* Inform the stack of the hand-over request. */
+		if(a->ops->handover_request) {
+			a->ops->handover_request(msg, &reply);
+		}
+
+		if(reply) {
+			sched_send_msg(a, reply);
+			emage_msg__free_unpacked(reply, 0);
+		}
+
+		break;
+	default:
+		EMDBG("Unknown controller command detected");
 	}
 
 	return JOB_CONSUMED;
@@ -103,6 +149,7 @@ int sched_perform_hello(struct agent * a, struct sched_job * job) {
 	char * buf = 0;
 	int blen = 0;
 	int sent = 0;
+	int ret  = JOB_CONSUMED;
 
 	if(msg_parse_hello(net_next_seq(&a->net), a->b_id, &buf, &blen)) {
 		EMLOG("Could not parse Hello message.");
@@ -113,9 +160,10 @@ int sched_perform_hello(struct agent * a, struct sched_job * job) {
 
 	if(sent < 0) {
 		EMDBG("Sending Hello failed!");
-		return JOB_NET_ERROR;
+		ret = JOB_NET_ERROR;
 	}
 
+	free(buf);
 	return JOB_CONSUMED;
 }
 
@@ -245,6 +293,12 @@ int sched_perform_job(
 		break;
 	case JOB_TYPE_RRC_MCON_TRIGGER:
 		status = sched_perform_RRC_mcon(a, job);
+		break;
+	case JOB_TYPE_CELL_STATS_TRIGGER:
+		status = sched_perform_cell_tstats(a, job);
+		break;
+	case JOB_TYPE_CTRL_COMMAND:
+		status = sched_perform_ctrl_cmd(a, job);
 		break;
 	default:
 		EMDBG("Unknown job cannot be performed, type=%d", job->type);

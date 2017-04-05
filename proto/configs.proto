@@ -21,7 +21,7 @@
 syntax = "proto2";
 
 ///////////////////////////////////////////////////////////////////////////////
-//								ENUMS										//
+//                                 ENUMS                                     //
 ///////////////////////////////////////////////////////////////////////////////
 
 //
@@ -267,13 +267,22 @@ enum conf_req_status {
 	CREQS_FAILURE = 1;
 }
 
+//
+// Enumerate the possible type of information which can be retrieved by an eNB
+// cell(s).
+//
+enum eNB_cells_info_types {
+	// Request generic information of the cells.
+	ENB_CELLS_INFO = 1;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
-// 																			//
+//                                                                           //
 ///////////////////////////////////////////////////////////////////////////////
 
 
 ///////////////////////////////////////////////////////////////////////////////
-//								MESSAGES									//
+//                                 MESSAGES                                  //
 ///////////////////////////////////////////////////////////////////////////////
 
 //
@@ -574,7 +583,7 @@ message active_ue {
 	// IMSI of UE.
 	optional uint64 imsi = 2;
 	// PLMN ID of CN to which UE is connected.
-	optional uint32 plmn_id = 3;
+	required uint32 plmn_id = 3;
 }
 
 //
@@ -586,7 +595,7 @@ message inactive_ue {
 	// IMSI of UE.
 	optional uint64 imsi = 2;
 	// PLMN ID of CN to which UE is attached.
-	optional uint32 plmn_id = 3;
+	required uint32 plmn_id = 3;
 }
 
 //
@@ -611,5 +620,41 @@ message ues_id {
 		ues_id_req req = 1;
 		// Reply message with identifiers of all the UEs registered.
 		ues_id_repl repl = 2;
+	}
+}
+
+//
+// eNB cells information request.
+//
+message eNB_cells_req {
+	// Type of info required from the cells.
+	required uint32 enb_info_types = 1;
+}
+
+//
+// Message definition for cell.
+//
+message cell_information {
+	// Physical cell id.
+	required uint32 phys_cell_id = 1;
+	// Operating frequency (MHz).
+	required uint32 carrier_freq = 2;
+}
+
+//
+// Reply to a request of cell information.
+//
+message eNB_cells_repl {
+	// Information about the eNB cells.
+	repeated cell_information cells = 1;
+}
+
+//
+// Message definition for getting eNB cells information.
+//
+message eNB_cells {
+	oneof eNB_cells_m {
+		eNB_cells_req req = 1;
+		eNB_cells_repl repl = 2;
 	}
 }
