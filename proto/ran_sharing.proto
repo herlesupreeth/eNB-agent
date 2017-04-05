@@ -1,0 +1,177 @@
+/* Copyright (c) 2016 Supreeth herle <s.herle@fbk.eu>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*
+ * This file carries the definition of the messages used to control the
+ * scheduling operation in eNB stack from the controller.
+ */
+
+syntax = "proto2";
+
+///////////////////////////////////////////////////////////////////////////////
+//								ENUMS										 //
+///////////////////////////////////////////////////////////////////////////////
+
+//
+// Response types for the RAN sharing request. Success or failure.
+//
+enum ran_share_req_status {
+	// Successful outcome.
+	RANSHARE_REQ_SUCCESS = 0;
+	// Failure outcome.
+	RANSHARE_REQ_FAILURE = 1;
+}
+
+//
+// Operation to be performed on the tenant information.
+//
+enum tenant_info_op_type {
+	// Add/modify tenant information in the eNB.
+	TI_OP_ADD = 0;
+	// Modify tenant information in the eNB.
+	TI_OP_MOD = 1;
+	// Delete tenant information in the eNB.
+	TI_OP_DEL = 2;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// 																			 //
+///////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////
+//								MESSAGES							 		 //
+///////////////////////////////////////////////////////////////////////////////
+
+//
+// Message definition of type of tenant selected from controller.
+//
+message tenant_scheduler {
+	// Unique name of the tenant scheduler.
+	required string name = 1;
+}
+
+//
+// Message definition for scheduling parameters that needs to be passed to UE
+// scheduler.
+//
+message ue_sched_param {
+	// Name of the field.
+	required string name = 1;
+	// Value of the field.
+	required string value = 2;
+}
+
+//
+// Message definition of type of UE scheduler selected from controller.
+//
+message ue_scheduler {
+	// Unique name of the UE scheduler.
+	required string name = 1;
+	// Number of Resource Blocks (RBs) required by tenant over every one frame
+	// in all Component Carriers (CC). Array index corresponds to CC identifier.
+	repeated uint32 num_rbs_every_frame = 2;
+	// Name value pairs of the parameters to be passed to the scheduler.
+	repeated ue_sched_param params = 3;
+}
+
+//
+// Message definition of tenant information provided to eNB.
+//
+message tenant_info {
+	// Unique PLMN ID of a tenant.
+	required uint32 plmn_id = 1;
+	// UEs Downlink scheduling information for a tenant.
+	optional ue_scheduler downlink_ue_sched = 2;
+	// UEs Uplink scheduling information for a tenant.
+	optional ue_scheduler uplink_ue_sched = 3;
+}
+
+//
+// Message definition of RBs allocation to tenants in a subframe.
+//
+message t_rbs_alloc_over_sf {
+	// Allocation of RBs to the tenants in a subframe.
+	// Length of the following field depends on the number of RBs the eNB or
+	// cell is operating on. (6 RBs, 25 RBs, 50 RBs, 100 RBs etc.)
+	repeated uint32 t_rbs_alloc = 1;
+}
+
+//
+// Message definition of tenant information provided to eNB.
+//
+message t_rbs_alloc_every_frame {
+	// Allocation of RBs in a subframe 0 to the tenants.
+	required t_rbs_alloc_over_sf sf0 = 1;
+	// Allocation of RBs to the tenants in a subframe 1.
+	required t_rbs_alloc_over_sf sf1 = 2;
+	// Allocation of RBs to the tenants in a subframe 2.
+	required t_rbs_alloc_over_sf sf2 = 3;
+	// Allocation of RBs to the tenants in a subframe 3.
+	required t_rbs_alloc_over_sf sf3 = 4;
+	// Allocation of RBs to the tenants in a subframe 4.
+	required t_rbs_alloc_over_sf sf4 = 5;
+	// Allocation of RBs to the tenants in a subframe 5.
+	required t_rbs_alloc_over_sf sf5 = 6;
+	// Allocation of RBs to the tenants in a subframe 6.
+	required t_rbs_alloc_over_sf sf6 = 7;
+	// Allocation of RBs to the tenants in a subframe 7.
+	required t_rbs_alloc_over_sf sf7 = 8;
+	// Allocation of RBs to the tenants in a subframe 8.
+	required t_rbs_alloc_over_sf sf8 = 9;
+	// Allocation of RBs to the tenants in a subframe 9.
+	required t_rbs_alloc_over_sf sf9 = 10;
+}
+
+//
+// Message definition of request for add/modify/delete RAN sharing information.
+//
+message ran_sharing_ctrl_req {
+	// Tenant scheduler information.
+	optional tenant_scheduler tenant_sched = 1;
+	// Tenant information.
+	optional tenant_info tenant = 2;
+	// Add/modify/delete tenant information in eNB.
+	optional tenant_info_op_type op_type = 3;
+	// Tenants scheduling information over every frame.
+	optional t_rbs_alloc_every_frame t_rbs_alloc = 4;
+}
+
+//
+// Message definition for a request to add/modify/delete RAN sharing
+// information.
+//
+message ran_sharing_ctrl_repl {
+	// Status of request for add/modify/delete RAN sharing information in eNB.
+	required ran_share_req_status status = 1;
+}
+
+//
+// Message definition for add/modify/delete RAN sharing information in eNB.
+//
+message ran_sharing_ctrl {
+	// Request and response for add/modify/delete RAN sharing information.
+	oneof ran_sharing_ctrl_m {
+		// Request message for add/modify/delete RAN sharing information.
+		ran_sharing_ctrl_req req = 1;
+		// Reply message for a request to add/modify/delete RAN sharing
+		// information.
+		ran_sharing_ctrl_repl repl = 2;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// 																			 //
+///////////////////////////////////////////////////////////////////////////////
