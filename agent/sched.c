@@ -164,7 +164,7 @@ int sched_perform_hello(struct agent * a, struct sched_job * job) {
 	}
 
 	free(buf);
-	return JOB_CONSUMED;
+	return ret;
 }
 
 int sched_perform_RRC_mcon(struct agent * a, struct sched_job * job) {
