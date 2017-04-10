@@ -103,6 +103,23 @@ int sched_perform_send(struct agent * a, struct sched_job * job) {
 	return ret;
 }
 
+int sched_perform_enb_cells(struct agent * a, struct sched_job * job) {
+	EmageMsg * msg   = (EmageMsg *)job->args;
+	EmageMsg * reply = 0;
+
+	if(a->ops->eNB_cells_report) {
+		a->ops->eNB_cells_report(msg, &reply);
+	}
+
+	/* Something to say at the controller? */
+	if(reply) {
+		sched_send_msg(a, reply);
+		emage_msg__free_unpacked(reply, 0);
+	}
+
+	return JOB_CONSUMED;
+}
+
 /* This has to be used only in case of trigger events. */
 int sched_perform_cell_tstats(struct agent * a, struct sched_job * job) {
 	struct trigger * t = (struct trigger*)job->args;
@@ -299,6 +316,9 @@ int sched_perform_job(
 		break;
 	case JOB_TYPE_CTRL_COMMAND:
 		status = sched_perform_ctrl_cmd(a, job);
+		break;
+	case JOB_TYPE_ENB_CELLS:
+		status = sched_perform_enb_cells(a, job);
 		break;
 	default:
 		EMDBG("Unknown job cannot be performed, type=%d", job->type);

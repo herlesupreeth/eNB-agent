@@ -112,6 +112,14 @@ struct em_agent_ops {
 	 */
 	int (* cell_statistics_report) (
 		EmageMsg * request, EmageMsg ** reply, unsigned int trigger_id);
+
+
+	/* Informs that the controller required to report about some kind of
+	 * information regarding the eNB cells.
+	 *
+	 * Return 0 on success, a negative error code otherwise.
+	 */
+	int (* eNB_cells_report) (EmageMsg * request, EmageMsg ** reply);
 };
 
 /* Peek the triggers of the given agent and check if a trigger is enabled or

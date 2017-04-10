@@ -268,6 +268,21 @@ int net_se_ctrl_cmd(struct net_context * net, EmageMsg * msg) {
 		a, msg->head->t_id, JOB_TYPE_CTRL_COMMAND, 1, 0, msg);
 }
 
+int net_se_enb_cells(struct net_context * net, EmageMsg * msg) {
+	struct agent * a = container_of(net, struct agent, net);
+
+	if(msg->se->menb_cells->e_nb_cells_m_case !=
+		E_NB_CELLS__E_NB_CELLS_M_REQ) {
+
+		EMDBG("Invalid eNB cell reply received.");
+		return 0;
+
+	}
+
+	return net_sched_job(
+		a, msg->head->t_id, JOB_TYPE_ENB_CELLS, 1, 0, msg);
+}
+
 /* Schedule an UE ids trigger job. */
 int net_te_usid(struct net_context * net, EmageMsg * msg) {
 	struct agent * a = container_of(net, struct agent, net);
@@ -447,7 +462,8 @@ int net_process_single_event(struct net_context * net, EmageMsg * msg) {
 	switch(se->events_case) {
 	case SINGLE_EVENT__EVENTS_M_CTRL_CMDS:
 		return net_se_ctrl_cmd(net, msg);
-		break;
+	case SINGLE_EVENT__EVENTS_M_ENB_CELLS:
+		return net_se_enb_cells(net, msg);
 	default:
 		EMDBG("Unknown single event, type=%d", se->events_case);
 		break;
