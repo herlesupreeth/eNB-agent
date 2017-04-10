@@ -20,6 +20,8 @@
 
 syntax = "proto2";
 
+import "ran_sharing.proto";
+
 ///////////////////////////////////////////////////////////////////////////////
 //                                 ENUMS                                     //
 ///////////////////////////////////////////////////////////////////////////////
@@ -274,6 +276,8 @@ enum conf_req_status {
 enum eNB_cells_info_types {
 	// Request generic information of the cells.
 	ENB_CELLS_INFO = 1;
+	// Request RAN sharing information in eNB cells.
+	ENB_RAN_SHARING_INFO = 2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -639,22 +643,50 @@ message cell_information {
 	required uint32 phys_cell_id = 1;
 	// Operating frequency (MHz).
 	required uint32 carrier_freq = 2;
+	// Total number of Resource Blocks in a particular cell in Downlink.
+	optional uint32 num_rbs_dl = 3;
+	// Total number of Resource Blocks in a particular cell in Uplink.
+	optional uint32 num_rbs_ul = 4;
+	// Resource allocation type supported in Downlink Shared Channel.
+	repeated uint32 res_alloc_type_supp_dl = 5;
+	// Resource allocation type supported in Uplink Shared Channel.
+	repeated uint32 res_alloc_type_supp_ul = 6;
+}
+
+//
+// Message definition for RAN sharing information in eNB cells.
+//
+message ran_sharing_info {
+	// RBs allocation to tenants over current Downlink frame (in all cells).
+	repeated rbs_alloc_every_frame rbs_alloc_dl = 1;
+	// RBs allocation to tenants over current Uplink frame (in all cells).
+	repeated rbs_alloc_every_frame rbs_alloc_ul = 2;
+	// List of tenant scheduler implementations.
+	repeated string tenant_schedulers = 3;
+	// List of UE scheduler implementations.
+	repeated string ue_schedulers = 4;
 }
 
 //
 // Reply to a request of cell information.
 //
 message eNB_cells_repl {
+	// Status of request for cell information. Success or Failure.
+	required conf_req_status status = 1;
 	// Information about the eNB cells.
-	repeated cell_information cells = 1;
+	repeated cell_information cells = 2;
+	// Information about RAN sharing in eNB cells.
+	optional ran_sharing_info ran_sh_i = 3;
 }
 
 //
-// Message definition for getting eNB cells information.
+// Message definition for eNB cells information.
 //
 message eNB_cells {
 	oneof eNB_cells_m {
+		// Request message for fetching cells information in an eNB.
 		eNB_cells_req req = 1;
+		// Reply message with cells information in an eNB.
 		eNB_cells_repl repl = 2;
 	}
 }

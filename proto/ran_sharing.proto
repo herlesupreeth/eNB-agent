@@ -100,39 +100,39 @@ message tenant_info {
 }
 
 //
-// Message definition of RBs allocation to tenants in a subframe.
+// Message definition of RBs allocation in a subframe.
 //
-message t_rbs_alloc_over_sf {
-	// Allocation of RBs to the tenants in a subframe.
+message rbs_alloc_over_sf {
+	// Allocation of RBs in a subframe.
 	// Length of the following field depends on the number of RBs the eNB or
 	// cell is operating on. (6 RBs, 25 RBs, 50 RBs, 100 RBs etc.)
-	repeated uint32 t_rbs_alloc = 1;
+	repeated int32 rbs_alloc = 1;
 }
 
 //
-// Message definition of tenant information provided to eNB.
+// Message definition of RBs allocation over one frame.
 //
-message t_rbs_alloc_every_frame {
-	// Allocation of RBs in a subframe 0 to the tenants.
-	required t_rbs_alloc_over_sf sf0 = 1;
+message rbs_alloc_every_frame {
+	// Allocation of RBs to the tenants in a subframe 0.
+	required rbs_alloc_over_sf sf0 = 1;
 	// Allocation of RBs to the tenants in a subframe 1.
-	required t_rbs_alloc_over_sf sf1 = 2;
+	required rbs_alloc_over_sf sf1 = 2;
 	// Allocation of RBs to the tenants in a subframe 2.
-	required t_rbs_alloc_over_sf sf2 = 3;
+	required rbs_alloc_over_sf sf2 = 3;
 	// Allocation of RBs to the tenants in a subframe 3.
-	required t_rbs_alloc_over_sf sf3 = 4;
+	required rbs_alloc_over_sf sf3 = 4;
 	// Allocation of RBs to the tenants in a subframe 4.
-	required t_rbs_alloc_over_sf sf4 = 5;
+	required rbs_alloc_over_sf sf4 = 5;
 	// Allocation of RBs to the tenants in a subframe 5.
-	required t_rbs_alloc_over_sf sf5 = 6;
+	required rbs_alloc_over_sf sf5 = 6;
 	// Allocation of RBs to the tenants in a subframe 6.
-	required t_rbs_alloc_over_sf sf6 = 7;
+	required rbs_alloc_over_sf sf6 = 7;
 	// Allocation of RBs to the tenants in a subframe 7.
-	required t_rbs_alloc_over_sf sf7 = 8;
+	required rbs_alloc_over_sf sf7 = 8;
 	// Allocation of RBs to the tenants in a subframe 8.
-	required t_rbs_alloc_over_sf sf8 = 9;
+	required rbs_alloc_over_sf sf8 = 9;
 	// Allocation of RBs to the tenants in a subframe 9.
-	required t_rbs_alloc_over_sf sf9 = 10;
+	required rbs_alloc_over_sf sf9 = 10;
 }
 
 //
@@ -145,8 +145,8 @@ message ran_sharing_ctrl_req {
 	optional tenant_info tenant = 2;
 	// Add/modify/delete tenant information in eNB.
 	optional tenant_info_op_type op_type = 3;
-	// Tenants scheduling information over every frame.
-	optional t_rbs_alloc_every_frame t_rbs_alloc = 4;
+	// Tenants scheduling information to be applied in every frame (Downlink).
+	optional rbs_alloc_every_frame t_rbs_alloc_dl = 4;
 }
 
 //

@@ -60,7 +60,7 @@ message single_event {
 		ue_rrc_meas_conf mUE_rrc_meas_conf = 3;
 		cell_stats mCell_stats = 4;
 		controller_commands mCtrl_cmds = 5;
-		eNB_cells enb_cells = 6;
+		eNB_cells mENB_cells = 6;
 		ran_sharing_ctrl mRAN_sharing_ctrl = 7;
 	}
 }
