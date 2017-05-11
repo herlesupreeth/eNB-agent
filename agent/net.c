@@ -300,7 +300,10 @@ int net_te_usid(struct net_context * net, EmageMsg * msg) {
 		}
 
 		if(msg->te->action == EVENT_ACTION__EA_DEL) {
-			return tr_rem(&a->trig, msg->head->t_id);
+			return tr_rem(
+				&a->trig,
+				msg->head->t_id,
+				EM_UEs_ID_REPORT_TRIGGER);
 		} else {
 			t = tr_add(
 				&a->trig,
@@ -341,7 +344,10 @@ int net_te_rrc_meas(struct net_context * net, EmageMsg * msg) {
 	}
 
 	if(msg->te->action == EVENT_ACTION__EA_DEL) {
-		return tr_rem(&a->trig, msg->head->t_id);
+		return tr_rem(
+			&a->trig,
+			msg->head->t_id,
+			EM_RRC_MEAS_TRIGGER);
 	} else {
 		t = tr_add(
 			&a->trig,
@@ -381,7 +387,10 @@ int net_te_rrc_mcon(struct net_context * net, EmageMsg * msg) {
 	}
 
 	if(msg->te->action == EVENT_ACTION__EA_DEL) {
-		return tr_rem(&a->trig, msg->head->t_id);
+		return tr_rem(
+			&a->trig,
+			msg->head->t_id,
+			EM_RRC_MEAS_CONF_TRIGGER);
 	} else {
 		t = tr_add(
 			&a->trig,
@@ -416,7 +425,10 @@ int net_te_cell_stats(struct net_context * net, EmageMsg * msg) {
 	}
 
 	if(msg->te->action == EVENT_ACTION__EA_DEL) {
-		return tr_rem(&a->trig, msg->head->t_id);
+		return tr_rem(
+			&a->trig,
+			msg->head->t_id,
+			EM_CELL_STATS_TRIGGER);
 	} else {
 		t = tr_add(
 			&a->trig,

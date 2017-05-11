@@ -62,6 +62,6 @@ int tr_flush(struct tr_context * tc);
 struct trigger * tr_has_trigger(struct tr_context * tc, int id, int type);
 
 /* Removes a trigger from the agent triggering context. */
-int tr_rem(struct tr_context * tc, int id);
+int tr_rem(struct tr_context * tc, int id, int type);
 
 #endif

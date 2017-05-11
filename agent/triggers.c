@@ -99,14 +99,14 @@ int tr_flush(struct tr_context * tc) {
 	return 0;
 }
 
-int tr_rem(struct tr_context * tc, int id) {
+int tr_rem(struct tr_context * tc, int id, int type) {
 	struct trigger * t = 0;
 	struct trigger * u = 0;
 
 /****** LOCK ******************************************************************/
 	pthread_spin_lock(&tc->lock);
 	list_for_each_entry_safe(t, u, &tc->ts, next) {
-		if(t->id == id) {
+		if(t->id == id && t->type == type) {
 			EMDBG("Removing trigger %d", t->id);
 
 			list_del(&t->next);
