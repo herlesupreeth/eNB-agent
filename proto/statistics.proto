@@ -233,8 +233,10 @@ message cell_prb_utilization {
 // Message definition for Cell statistics reply.
 //
 message cell_stats_repl {
+	// Statistics request status. Failure or Success.
+	required stats_req_status status = 1;
 	// Physical resource block
-	optional cell_prb_utilization prb_utilz = 1;
+	optional cell_prb_utilization prb_utilz = 2;
 }
 
 //

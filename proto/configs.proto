@@ -551,8 +551,8 @@ message ue_rrc_meas_conf_repl {
 	repeated report_config r_conf = 8;
 	// Measurement identifers.
 	repeated meas_identifier meas_id = 9;
-	// Operating frequency (MHz) of the UE's primary serving cell.
-	optional float freq = 10;
+	// Operating frequency (EARFCN) of the UE's primary serving cell.
+	optional uint32 freq = 10;
 	// UE's primary serving cell FDD or TDD.
 	optional DD_mode pcell_DD = 11;
 }
@@ -585,9 +585,9 @@ message active_ue {
 	// RNTI of UE.
 	required uint32 rnti = 1;
 	// IMSI of UE.
-	optional uint64 imsi = 2;
+	optional string imsi = 2;
 	// PLMN ID of CN to which UE is connected.
-	required uint32 plmn_id = 3;
+	required string plmn_id = 3;
 }
 
 //
@@ -597,9 +597,9 @@ message inactive_ue {
 	// RNTI of UE.
 	required uint32 rnti = 1;
 	// IMSI of UE.
-	optional uint64 imsi = 2;
+	optional string imsi = 2;
 	// PLMN ID of CN to which UE is attached.
-	required uint32 plmn_id = 3;
+	required string plmn_id = 3;
 }
 
 //
@@ -631,7 +631,7 @@ message ues_id {
 // eNB cells information request.
 //
 message eNB_cells_req {
-	// Type of info required from the cells.
+	// Type of info required from the cells. Bitmap of eNB cells information.
 	required uint32 enb_info_types = 1;
 }
 
@@ -641,7 +641,7 @@ message eNB_cells_req {
 message cell_information {
 	// Physical cell id.
 	required uint32 phys_cell_id = 1;
-	// Operating frequency (MHz).
+	// Operating frequency (EARFCN value).
 	required uint32 carrier_freq = 2;
 	// Total number of Resource Blocks in a particular cell in Downlink.
 	optional uint32 num_rbs_dl = 3;
@@ -654,17 +654,37 @@ message cell_information {
 }
 
 //
-// Message definition for RAN sharing information in eNB cells.
+// Message definition for RAN sharing information in eNB cell.
 //
-message ran_sharing_info {
-	// RBs allocation to tenants over current Downlink frame (in all cells).
-	repeated rbs_alloc_every_frame rbs_alloc_dl = 1;
-	// RBs allocation to tenants over current Uplink frame (in all cells).
-	repeated rbs_alloc_every_frame rbs_alloc_ul = 2;
+message cell_ran_sharing_info {
+	// Physical cell id.
+	required uint32 phys_cell_id = 1;
+	// Number of RBs in a sched_window_dl time unallocated (free) in Downlink.
+	required uint32 avail_rbs_dl = 2;
+	// Number of RBs in a sched_window_ul time unallocated (free) in Uplink.
+	required uint32 avail_rbs_ul = 3;
+}
+
+//
+// Message definition for RAN sharing information in eNB.
+//
+message eNB_ran_sharing_info {
+	// Scheduling window supported in Downlink in terms of number of Subframes.
+	required uint64 sched_window_dl = 1;
+	// Scheduling window supported in Uplink in terms of number of Subframes.
+	required uint64 sched_window_ul = 2;
+	// RBs allocation to tenants over current Downlink sched_window_dl time
+	// (per cell). The length of array equals to number of cells.
+	repeated rbs_alloc_per_cell rbs_alloc_dl = 3;
+	// RBs allocation to tenants over current Uplink sched_window_ul time
+	// (per cell). The length of array equals to number of cells.
+	repeated rbs_alloc_per_cell rbs_alloc_ul = 4;
 	// List of tenant scheduler implementations.
-	repeated string tenant_schedulers = 3;
+	repeated string tenant_schedulers = 5;
 	// List of UE scheduler implementations.
-	repeated string ue_schedulers = 4;
+	repeated string ue_schedulers = 6;
+	// RAN sharing information in eNB cell.
+	repeated cell_ran_sharing_info cell = 7;
 }
 
 //
@@ -675,8 +695,8 @@ message eNB_cells_repl {
 	required conf_req_status status = 1;
 	// Information about the eNB cells.
 	repeated cell_information cells = 2;
-	// Information about RAN sharing in eNB cells.
-	optional ran_sharing_info ran_sh_i = 3;
+	// Information about RAN sharing in all the cells of eNB.
+	optional eNB_ran_sharing_info ran_sh_i = 3;
 }
 
 //

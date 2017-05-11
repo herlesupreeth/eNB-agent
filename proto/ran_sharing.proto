@@ -32,42 +32,23 @@ enum ran_share_req_status {
 	RANSHARE_REQ_SUCCESS = 0;
 	// Failure outcome.
 	RANSHARE_REQ_FAILURE = 1;
-}
-
-//
-// Operation to be performed on the tenant information.
-//
-enum tenant_info_op_type {
-	// Add/modify tenant information in the eNB.
-	TI_OP_ADD = 0;
-	// Modify tenant information in the eNB.
-	TI_OP_MOD = 1;
-	// Delete tenant information in the eNB.
-	TI_OP_DEL = 2;
+	// Unsupported outcome.
+	RANSHARE_REQ_UNSUPPORTED = 2;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // 																			 //
 ///////////////////////////////////////////////////////////////////////////////
 
-
 ///////////////////////////////////////////////////////////////////////////////
 //								MESSAGES							 		 //
 ///////////////////////////////////////////////////////////////////////////////
 
 //
-// Message definition of type of tenant selected from controller.
+// Message definition for scheduling parameters that needs to be passed to UE or
+// tenant scheduler.
 //
-message tenant_scheduler {
-	// Unique name of the tenant scheduler.
-	required string name = 1;
-}
-
-//
-// Message definition for scheduling parameters that needs to be passed to UE
-// scheduler.
-//
-message ue_sched_param {
+message scheduling_param {
 	// Name of the field.
 	required string name = 1;
 	// Value of the field.
@@ -75,28 +56,13 @@ message ue_sched_param {
 }
 
 //
-// Message definition of type of UE scheduler selected from controller.
+// Message definition of type of tenant selected from controller.
 //
-message ue_scheduler {
-	// Unique name of the UE scheduler.
+message tenant_scheduler {
+	// Unique name of the tenant scheduler.
 	required string name = 1;
-	// Number of Resource Blocks (RBs) required by tenant over every one frame
-	// in all Component Carriers (CC). Array index corresponds to CC identifier.
-	repeated uint32 num_rbs_every_frame = 2;
 	// Name value pairs of the parameters to be passed to the scheduler.
-	repeated ue_sched_param params = 3;
-}
-
-//
-// Message definition of tenant information provided to eNB.
-//
-message tenant_info {
-	// Unique PLMN ID of a tenant.
-	required uint32 plmn_id = 1;
-	// UEs Downlink scheduling information for a tenant.
-	optional ue_scheduler downlink_ue_sched = 2;
-	// UEs Uplink scheduling information for a tenant.
-	optional ue_scheduler uplink_ue_sched = 3;
+	repeated scheduling_param params = 2;
 }
 
 //
@@ -106,68 +72,185 @@ message rbs_alloc_over_sf {
 	// Allocation of RBs in a subframe.
 	// Length of the following field depends on the number of RBs the eNB or
 	// cell is operating on. (6 RBs, 25 RBs, 50 RBs, 100 RBs etc.)
-	repeated int32 rbs_alloc = 1;
+	repeated string rbs_alloc = 1;
 }
 
 //
-// Message definition of RBs allocation over one frame.
+// Message definition of adding a new tenant.
 //
-message rbs_alloc_every_frame {
-	// Allocation of RBs to the tenants in a subframe 0.
-	required rbs_alloc_over_sf sf0 = 1;
-	// Allocation of RBs to the tenants in a subframe 1.
-	required rbs_alloc_over_sf sf1 = 2;
-	// Allocation of RBs to the tenants in a subframe 2.
-	required rbs_alloc_over_sf sf2 = 3;
-	// Allocation of RBs to the tenants in a subframe 3.
-	required rbs_alloc_over_sf sf3 = 4;
-	// Allocation of RBs to the tenants in a subframe 4.
-	required rbs_alloc_over_sf sf4 = 5;
-	// Allocation of RBs to the tenants in a subframe 5.
-	required rbs_alloc_over_sf sf5 = 6;
-	// Allocation of RBs to the tenants in a subframe 6.
-	required rbs_alloc_over_sf sf6 = 7;
-	// Allocation of RBs to the tenants in a subframe 7.
-	required rbs_alloc_over_sf sf7 = 8;
-	// Allocation of RBs to the tenants in a subframe 8.
-	required rbs_alloc_over_sf sf8 = 9;
-	// Allocation of RBs to the tenants in a subframe 9.
-	required rbs_alloc_over_sf sf9 = 10;
+message add_tenant {
+	// Unique PLMN ID of a tenant.
+	required string plmn_id = 1;
 }
 
 //
-// Message definition of request for add/modify/delete RAN sharing information.
+// Message definition of removing a tenant.
+//
+message remove_tenant {
+	// Unique PLMN ID of a tenant.
+	required string plmn_id = 1;
+}
+
+//
+// Message definition for UE scheduler for a tenant.
+//
+message ue_sched_info {
+	// Unique name of the UE scheduler.
+	required string name = 1;
+	// Name value pairs of the parameters to be passed to the scheduler.
+	repeated scheduling_param params = 2;
+}
+
+//
+// Message definition of selecting the UE schedulers for a tenant.
+//
+message ue_sched_select {
+	// Unique PLMN ID of a tenant.
+	required string plmn_id = 1;
+	// Information about UEs scheduler for the tenant in DL.
+	optional ue_sched_info dl_ue_sched = 2;
+	// Information about UEs scheduler for the tenant in UL.
+	optional ue_sched_info ul_ue_sched = 3;
+}
+
+//
+// Message definition of RBs requested for each cell.
+//
+message rbs_per_cell {
+	// Physical cell id.
+	required uint32 phys_cell_id = 1;
+	// Number of Resource Blocks (RBs) required by tenant over every scheduling
+	// window (DL/UL) per cell.
+	required uint64 num_rbs = 2;
+}
+
+//
+// Message definition of request for RBs by a tenant.
+//
+message tenant_rbs_req {
+	// Unique PLMN ID of a tenant.
+	required string plmn_id = 1;
+	// RBs request in different cells/CCs (Downlink).
+	repeated rbs_per_cell rbs_dl = 2;
+	// RBs request in different cells/CCs (Uplink).
+	repeated rbs_per_cell rbs_ul = 3;
+}
+
+//
+// Message definition for modifying the scheduling window to be considered.
+// Scheduling window is the time period over which the requested RBs by the
+// tenants needs to be scheduled.
+//
+message modify_sched_window {
+	// Scheduling window in terms of number of Subframes in DL.
+	optional uint64 sched_window_dl = 1;
+	// Scheduling window in terms of number of Subframes in UL.
+	optional uint64 sched_window_ul = 2;
+}
+
+
+//
+// Message definition for RBs allocation per cell over a scheduling window.
+//
+message rbs_alloc_per_cell {
+	// Physical cell id.
+	required uint32 phys_cell_id = 1;
+	// RBs allocation to tenants over scheduling window time (DL/UL) per cell.
+	// The length of array equals to scheduling window time (DL/UL).
+	repeated rbs_alloc_over_sf sf = 2;
+}
+
+//
+// Message definition for tenants scheduling type with static allocation of RBs
+// for tenants.
+//
+message static_tenants_sched {
+	// RBs allocation to tenants over a cells/CCs and over scheduling window
+	// time.
+	repeated rbs_alloc_per_cell cell = 1;
+}
+
+//
+// Message definition for tenants scheduling type with dynamic allocation of RBs
+// for tenants by the selected tenant scheduler.
+//
+message dynamic_tenants_sched {
+	// Tenant scheduler information.
+	required tenant_scheduler sched = 1;
+}
+
+//
+// Message definition for tenants scheduling type where RBs allocation to
+// tenants are partially static and partially dynamic (by Tenant scheduler).
+//
+message mixed_tenants_sched {
+	// RBs allocation to tenants over a cells/CCs and over scheduling window
+	// time.
+	repeated rbs_alloc_per_cell cell = 1;
+	// Tenant scheduler information.
+	required tenant_scheduler sched = 2;
+}
+
+//
+// Message definition for tenants scheduling type selection in DL/UL.
+//
+message tenants_sched_select {
+	oneof sched_types {
+		// Static RBs allocation to tenants (Downlink).
+		static_tenants_sched static_sched_dl = 1;
+		// Dynamic RBs allocation to tenants by tenant scheduler (Downlink).
+		dynamic_tenants_sched dynm_sched_dl = 2;
+		// Mix of both static and dynamic RBs allocation to tenants (Downlink).
+		mixed_tenants_sched mixed_sched_dl = 3;
+		// Static RBs allocation to tenants (Uplink).
+		static_tenants_sched static_sched_ul = 4;
+		// Dynamic RBs allocation to tenants by tenant scheduler (Uplink).
+		dynamic_tenants_sched dynm_sched_ul = 5;
+		// Mix of both static and dynamic RBs allocation to tenants (Uplink).
+		mixed_tenants_sched mixed_sched_ul = 6;
+	}
+}
+
+//
+// Message definition of request for controlling the RAN sharing in eNB.
 //
 message ran_sharing_ctrl_req {
-	// Tenant scheduler information.
-	optional tenant_scheduler tenant_sched = 1;
-	// Tenant information.
-	optional tenant_info tenant = 2;
-	// Add/modify/delete tenant information in eNB.
-	optional tenant_info_op_type op_type = 3;
-	// Tenants scheduling information to be applied in every frame (Downlink).
-	optional rbs_alloc_every_frame t_rbs_alloc_dl = 4;
+	// RAN sharing control requests.
+	oneof ctrl_req {
+		// Add a new Tenant.
+		add_tenant add_t = 1;
+		// Remove an existing Tenant.
+		remove_tenant rem_t = 2;
+		// Selecting or modifying the UE scheduler for a tenant.
+		ue_sched_select ue_sched_sel = 3;
+		// Tenant's request for number of RBs over a repeating scheduling
+		// window.
+		tenant_rbs_req t_rbs_req = 4;
+		// Select the Tenant Scheduler type.
+		tenants_sched_select t_sched_sel = 5;
+		// Modify the scheduling window.
+		modify_sched_window mod_sched_window = 6;
+	}
 }
 
 //
-// Message definition for a request to add/modify/delete RAN sharing
-// information.
+// Message definition of reply message for a request to control the RAN sharing
+// in eNB.
 //
 message ran_sharing_ctrl_repl {
-	// Status of request for add/modify/delete RAN sharing information in eNB.
+	// Status of request for controlling the RAN sharing in eNB.
 	required ran_share_req_status status = 1;
 }
 
 //
-// Message definition for add/modify/delete RAN sharing information in eNB.
+// Message definition for controlling RAN sharing in eNB.
 //
 message ran_sharing_ctrl {
-	// Request and response for add/modify/delete RAN sharing information.
+	// Request and response for controlling RAN sharing in eNB.
 	oneof ran_sharing_ctrl_m {
-		// Request message for add/modify/delete RAN sharing information.
+		// Request message for controlling RAN sharing in eNB.
 		ran_sharing_ctrl_req req = 1;
-		// Reply message for a request to add/modify/delete RAN sharing
-		// information.
+		// Reply message for a request to controlling RAN sharing in eNB.
 		ran_sharing_ctrl_repl repl = 2;
 	}
 }
