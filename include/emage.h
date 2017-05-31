@@ -120,6 +120,17 @@ struct em_agent_ops {
 	 * Return 0 on success, a negative error code otherwise.
 	 */
 	int (* eNB_cells_report) (EmageMsg * request, EmageMsg ** reply);
+
+	/*
+	 * RAN sharing.
+	 */
+
+	/* Informs that the controller required some operation related to the
+	 * RAN sharing branch of the cell.
+	 *
+	 * Returns 0 on success, a negative error code otherwise.
+	 */
+	int (* ran_sharing_control) (EmageMsg * request, EmageMsg ** reply);
 };
 
 /* Peek the triggers of the given agent and check if a trigger is enabled or

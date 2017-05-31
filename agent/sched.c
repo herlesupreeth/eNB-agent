@@ -120,6 +120,24 @@ int sched_perform_enb_cells(struct agent * a, struct sched_job * job) {
 	return JOB_CONSUMED;
 }
 
+int sched_perform_ran_sh(struct agent * a, struct sched_job * job) {
+	EmageMsg * msg   = (EmageMsg *)job->args;
+	EmageMsg * reply = 0;
+
+	if(a->ops->ran_sharing_control) {
+		a->ops->ran_sharing_control(msg, &reply);
+	}
+
+	/* Something to say at the controller? */
+	if(reply) {
+		sched_send_msg(a, reply);
+		emage_msg__free_unpacked(reply, 0);
+	}
+
+	return JOB_CONSUMED;
+}
+
+
 /* This has to be used only in case of trigger events. */
 int sched_perform_cell_tstats(struct agent * a, struct sched_job * job) {
 	struct trigger * t = (struct trigger*)job->args;
@@ -320,6 +338,9 @@ int sched_perform_job(
 	case JOB_TYPE_ENB_CELLS:
 		status = sched_perform_enb_cells(a, job);
 		break;
+	case JOB_TYPE_RAN_SHARING:
+		status = sched_perform_ran_sh(a, job);
+		break;
 	default:
 		EMDBG("Unknown job cannot be performed, type=%d", job->type);
 	}
@@ -416,6 +437,8 @@ int sched_consume(struct sched_context * sched) {
 
 			pthread_spin_unlock(&sched->lock);
 /****** UNLOCK ****************************************************************/
+
+			tr_flush(&a->trig);
 
 			/* Signal the connection down now.
 			 * We do it here since we are sure we cleaned all the

@@ -78,6 +78,7 @@ message schedule_event {
 		ues_id mUEs_id = 3;
 		ue_rrc_meas_conf mUE_rrc_meas_conf = 4;
 		cell_stats mCell_stats = 5;
+		eNB_cells mENB_cells = 6;
 	}
 }
 

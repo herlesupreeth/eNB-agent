@@ -127,6 +127,8 @@ int net_not_connected(struct net_context * net) {
 
 	net->status = EM_STATUS_NOT_CONNECTED;
 	net->seq = 0;
+
+	return 0;
 }
 
 /* Connect to the controller. Returns the open socket file descriptor if a
@@ -281,6 +283,21 @@ int net_se_enb_cells(struct net_context * net, EmageMsg * msg) {
 
 	return net_sched_job(
 		a, msg->head->t_id, JOB_TYPE_ENB_CELLS, 1, 0, msg);
+}
+
+int net_se_ran_sh(struct net_context * net, EmageMsg * msg) {
+	struct agent * a = container_of(net, struct agent, net);
+
+	if(msg->se->mran_sharing_ctrl->ran_sharing_ctrl_m_case !=
+		RAN_SHARING_CTRL__RAN_SHARING_CTRL_M_REQ) {
+
+		EMDBG("Invalid RAN sharing reply received.");
+		return 0;
+
+	}
+
+	return net_sched_job(
+		a, msg->head->t_id, JOB_TYPE_RAN_SHARING, 1, 0, msg);
 }
 
 /* Schedule an UE ids trigger job. */
@@ -476,6 +493,8 @@ int net_process_single_event(struct net_context * net, EmageMsg * msg) {
 		return net_se_ctrl_cmd(net, msg);
 	case SINGLE_EVENT__EVENTS_M_ENB_CELLS:
 		return net_se_enb_cells(net, msg);
+	case SINGLE_EVENT__EVENTS_M_RAN_SHARING_CTRL:
+		return net_se_ran_sh(net, msg);
 	default:
 		EMDBG("Unknown single event, type=%d", se->events_case);
 		break;
