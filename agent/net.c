@@ -300,6 +300,36 @@ int net_se_ran_sh(struct net_context * net, EmageMsg * msg) {
 		a, msg->head->t_id, JOB_TYPE_RAN_SHARING, 1, 0, msg);
 }
 
+int net_sc_enb_cells(struct net_context * net, EmageMsg * msg) {
+	struct agent * a = container_of(net, struct agent, net);
+
+	if(msg->sche->menb_cells->e_nb_cells_m_case !=
+		E_NB_CELLS__E_NB_CELLS_M_REQ) {
+
+		EMDBG("Invalid eNB cell reply received.");
+		return 0;
+	}
+
+	/* Remove any job with such id. */
+	if(msg->sche->action == EVENT_ACTION__EA_DEL) {
+		sched_remove_job(
+			msg->head->t_id,
+			JOB_TYPE_ENB_CELLS,
+			&a->sched);
+
+		return 0;
+	}
+
+	return net_sched_job(
+		a,
+		msg->head->t_id,
+		JOB_TYPE_ENB_CELLS,
+		/* In case of no interval, schedule every second. */
+		msg->sche->has_interval ? msg->sche->interval : 1000,
+		-1,
+		msg);
+}
+
 /* Schedule an UE ids trigger job. */
 int net_te_usid(struct net_context * net, EmageMsg * msg) {
 	struct agent * a = container_of(net, struct agent, net);
@@ -477,6 +507,8 @@ int net_process_sched_event(struct net_context * net, EmageMsg * msg) {
 	ScheduleEvent * ce = msg->sche;
 
 	switch(ce->events_case) {
+	case SCHEDULE_EVENT__EVENTS_M_CELL_STATS:
+		return net_sc_enb_cells(net, msg);
 	default:
 		EMDBG("Unknown scheduled event, type=%d", ce->events_case);
 		break;

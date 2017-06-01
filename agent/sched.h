@@ -53,7 +53,9 @@ struct sched_job {
 
 	/* Data arguments for this job. */
 	void * args;
-	/* Setting this to -1 cause the job to be automatically re-scheduled. */
+	/* This variable contains the number of time a message will be
+	 * rescheduled; -1 cause the job to be re-scheduled forever.
+	 */
 	int reschedule;
 
 	/* Time when the job has been enqueued. */
@@ -83,7 +85,7 @@ struct sched_context {
 int sched_add_job(struct sched_job * job, struct sched_context * sched);
 
 /* Release a job which is currently scheduled by using the associated id. */
-int sched_remove_job(unsigned int id, struct sched_context * sched);
+int sched_remove_job(unsigned int id, int type, struct sched_context * sched);
 
 /* Correctly start a new scheduler in it's own context. */
 int sched_start(struct sched_context * sched);

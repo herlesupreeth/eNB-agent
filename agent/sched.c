@@ -347,6 +347,13 @@ int sched_perform_job(
 
 	/* The job has to be rescheduled? */
 	if(status == 0 && job->reschedule != 0) {
+		/* In case we have a limited amount of rescheduled jobs,
+		 * decrement them.
+		 */
+		if(job->reschedule > 0) {
+			job->reschedule--;
+		}
+
 		return JOB_RESCHEDULE;
 	}
 
@@ -470,7 +477,7 @@ int sched_consume(struct sched_context * sched) {
 	return 0;
 }
 
-int sched_remove_job(unsigned int id, struct sched_context * sched) {
+int sched_remove_job(unsigned int id, int type, struct sched_context * sched) {
 	int found = 0;
 
 	struct sched_job * job = 0;
@@ -480,22 +487,27 @@ int sched_remove_job(unsigned int id, struct sched_context * sched) {
 /****** LOCK ******************************************************************/
 	pthread_spin_lock(&sched->lock);
 	list_for_each_entry_safe(job, tmp, &sched->jobs, next) {
-		if(job->id == id) {
+		if(job->id == id && job->type == type) {
 			found = 1;
 			list_del(&job->next);
 
-			break;
+			/* There can be multiple jobs with the same id in case
+			 * of cancellation events, so remove everything.
+			 */
 		}
 	}
 
 	/* Where is it? Already performed? */
 	if(!found) {
 		list_for_each_entry_safe(job, tmp, &sched->todo, next) {
-			if(job->id == id) {
+			if(job->id == id && job->type == type) {
 				found = 1;
 				list_del(&job->next);
 
-				break;
+				/* There can be multiple jobs with the same id
+				 * in case of cancellation events, so remove
+				 * everything.
+				 */
 			}
 		}
 	}
@@ -503,6 +515,7 @@ int sched_remove_job(unsigned int id, struct sched_context * sched) {
 /****** UNLOCK ****************************************************************/
 
 	if(!found) {
+		EMDBG("Job %d NOT found!", job->id);
 		return -1;
 	}
 
