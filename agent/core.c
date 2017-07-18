@@ -112,6 +112,26 @@ int em_has_trigger(int enb_id, int tid, int ttype) {
 	return t ? 1 : 0;
 }
 
+int em_is_connected(int enb_id) {
+	struct agent * a = 0;
+	int found = 0;
+
+/****** LOCK ******************************************************************/
+	pthread_spin_lock(&em_agents_lock);
+	list_for_each_entry(a, &em_agents, next) {
+		if(a->b_id == enb_id) {
+			/* 1/0 evaluation operation. */
+			found = (a->net.status == EM_STATUS_CONNECTED);
+			break;
+		}
+	}
+	pthread_spin_unlock(&em_agents_lock);
+/****** UNLOCK ****************************************************************/
+
+	return found;
+}
+
+
 /* Read the configuration file and set the globals properly. Returns a negative
  * error number on error.
  */

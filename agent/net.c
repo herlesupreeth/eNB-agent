@@ -507,7 +507,7 @@ int net_process_sched_event(struct net_context * net, EmageMsg * msg) {
 	ScheduleEvent * ce = msg->sche;
 
 	switch(ce->events_case) {
-	case SCHEDULE_EVENT__EVENTS_M_CELL_STATS:
+	case SCHEDULE_EVENT__EVENTS_M_ENB_CELLS:
 		return net_sc_enb_cells(net, msg);
 	default:
 		EMDBG("Unknown scheduled event, type=%d", ce->events_case);

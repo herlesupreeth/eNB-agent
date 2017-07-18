@@ -347,13 +347,6 @@ int sched_perform_job(
 
 	/* The job has to be rescheduled? */
 	if(status == 0 && job->reschedule != 0) {
-		/* In case we have a limited amount of rescheduled jobs,
-		 * decrement them.
-		 */
-		if(job->reschedule > 0) {
-			job->reschedule--;
-		}
-
 		return JOB_RESCHEDULE;
 	}
 

@@ -679,12 +679,16 @@ message eNB_ran_sharing_info {
 	// RBs allocation to tenants over current Uplink sched_window_ul time
 	// (per cell). The length of array equals to number of cells.
 	repeated rbs_alloc_per_cell rbs_alloc_ul = 4;
-	// List of tenant scheduler implementations.
-	repeated string tenant_schedulers = 5;
-	// List of UE scheduler implementations.
-	repeated string ue_schedulers = 6;
+	// List of tenant scheduler implementations in downlink.
+	repeated string tenant_schedulers_dl = 5;
+	// List of UE scheduler implementations in downlink.
+	repeated string ue_schedulers_dl = 6;
+	// List of tenant scheduler implementations in uplink.
+	repeated string tenant_schedulers_ul = 7;
+	// List of UE scheduler implementations in uplink.
+	repeated string ue_schedulers_ul = 8;
 	// RAN sharing information in eNB cell.
-	repeated cell_ran_sharing_info cell = 7;
+	repeated cell_ran_sharing_info cell = 9;
 }
 
 //

@@ -38,8 +38,8 @@ enum EM_TRIGGER_TYPE {
 
 /* Defines the operations that can be customized depending on the technology
  * where you want to embed the agent to. Such procedures will be called by the
- * agent main logic while responding to the controller orders of event triggered
- * by the local system.
+ * agent main logic while responding to the controller orders or events
+ * triggered by the local system.
  */
 struct em_agent_ops {
 	/* Perform custom initialization for the technology abstraction layer.
@@ -140,6 +140,12 @@ struct em_agent_ops {
  * Returns 1 if the trigger is enabled, 0 otherwise.
  */
 int em_has_trigger(int enb_id, int tid, int ttype);
+
+/* Check if the agent is currently connected to a controller.
+ *
+ * Returns 1 if the agent is connected to a controller, 0 otherwise.
+ */
+int em_is_connected(int enb_id);
 
 /* Send a message to the connected controller, if any controller is attached.
  * This operations is only possible if the agent for that particular id has
